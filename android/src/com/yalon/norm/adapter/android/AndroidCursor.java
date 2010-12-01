@@ -1,172 +1,303 @@
 package com.yalon.norm.adapter.android;
 
+import android.database.SQLException;
+
 import com.yalon.norm.Cursor;
 
 public class AndroidCursor implements Cursor {
 	android.database.Cursor cursor;
+	AndroidSQLExceptionConverter exceptionConverter;
 
-	AndroidCursor(android.database.Cursor cursor) {
+	AndroidCursor(android.database.Cursor cursor, AndroidSQLExceptionConverter exceptionConverter) {
 		this.cursor = cursor;
+		this.exceptionConverter = exceptionConverter;
 	}
 
 	@Override
 	public int getColumnCount() {
-		return this.cursor.getColumnCount();
+		try {
+			return this.cursor.getColumnCount();
+		} catch (SQLException e) {
+			throw exceptionConverter.convert(e);
+		}
 	}
 
 	@Override
 	public int getColumnIndex(String columnName) {
-		return this.cursor.getColumnIndex(columnName);
+		try {
+			return this.cursor.getColumnIndex(columnName);
+		} catch (SQLException e) {
+			throw exceptionConverter.convert(e);
+		}
 	}
 
 	@Override
 	public int getColumnIndexOrThrow(String columnName) throws IllegalArgumentException {
-		return this.cursor.getColumnIndexOrThrow(columnName);
+		try {
+			return this.cursor.getColumnIndexOrThrow(columnName);
+		} catch (SQLException e) {
+			throw exceptionConverter.convert(e);
+		}
 	}
 
 	@Override
 	public String getColumnName(int columnIndex) {
-		return this.cursor.getColumnName(columnIndex);
+		try {
+			return this.cursor.getColumnName(columnIndex);
+		} catch (SQLException e) {
+			throw exceptionConverter.convert(e);
+		}
 	}
 
 	@Override
 	public String[] getColumnNames() {
-		return this.cursor.getColumnNames();
+		try {
+			return this.cursor.getColumnNames();
+		} catch (SQLException e) {
+			throw exceptionConverter.convert(e);
+		}
 	}
 
 	@Override
 	public byte[] getBlob(int columnIndex) {
-		return this.cursor.getBlob(columnIndex);
+		try {
+			return this.cursor.getBlob(columnIndex);
+		} catch (SQLException e) {
+			throw exceptionConverter.convert(e);
+		}
 	}
 
 	@Override
 	public boolean getBoolean(int columnIndex) {
-		return this.cursor.getInt(columnIndex) == 0 ? false : true;
+		try {
+			return this.cursor.getInt(columnIndex) == 0 ? false : true;
+		} catch (SQLException e) {
+			throw exceptionConverter.convert(e);
+		}
 	}
 
 	@Override
 	public char getCharacter(int columnIndex) {
-		return this.cursor.getString(columnIndex).charAt(0);
+		try {
+			return this.cursor.getString(columnIndex).charAt(0);
+		} catch (SQLException e) {
+			throw exceptionConverter.convert(e);
+		}
 	}
 
 	@Override
 	public byte getByte(int columnIndex) {
-		return (byte) this.cursor.getInt(columnIndex);
+		try {
+			return (byte) this.cursor.getInt(columnIndex);
+		} catch (SQLException e) {
+			throw exceptionConverter.convert(e);
+		}
 	}
 
 	@Override
 	public double getDouble(int columnIndex) {
-		return this.cursor.getDouble(columnIndex);
+		try {
+			return this.cursor.getDouble(columnIndex);
+		} catch (SQLException e) {
+			throw exceptionConverter.convert(e);
+		}
 	}
 
 	@Override
 	public float getFloat(int columnIndex) {
-		return this.cursor.getFloat(columnIndex);
+		try {
+			return this.cursor.getFloat(columnIndex);
+		} catch (SQLException e) {
+			throw exceptionConverter.convert(e);
+		}
 	}
 
 	@Override
 	public int getInt(int columnIndex) {
-		return this.cursor.getInt(columnIndex);
+		try {
+			return this.cursor.getInt(columnIndex);
+		} catch (SQLException e) {
+			throw exceptionConverter.convert(e);
+		}
 	}
 
 	@Override
 	public long getLong(int columnIndex) {
-		return this.cursor.getLong(columnIndex);
+		try {
+			return this.cursor.getLong(columnIndex);
+		} catch (SQLException e) {
+			throw exceptionConverter.convert(e);
+		}
 	}
 
 	@Override
 	public short getShort(int columnIndex) {
-		return this.cursor.getShort(columnIndex);
+		try {
+			return this.cursor.getShort(columnIndex);
+		} catch (SQLException e) {
+			throw exceptionConverter.convert(e);
+		}
 	}
 
 	@Override
 	public String getString(int columnIndex) {
-		return this.cursor.getString(columnIndex);
+		try {
+			return this.cursor.getString(columnIndex);
+		} catch (SQLException e) {
+			throw exceptionConverter.convert(e);
+		}
 	}
 
 	@Override
 	public boolean isNull(int columnIndex) {
-		return this.cursor.isNull(columnIndex);
+		try {
+			return this.cursor.isNull(columnIndex);
+		} catch (SQLException e) {
+			throw exceptionConverter.convert(e);
+		}
 	}
 
 	@Override
 	public int getCount() {
-		return this.cursor.getCount();
+		try {
+			return this.cursor.getCount();
+		} catch (SQLException e) {
+			throw exceptionConverter.convert(e);
+		}
 	}
 
 	@Override
 	public int getPosition() {
-		return this.cursor.getPosition();
+		try {
+			return this.cursor.getPosition();
+		} catch (SQLException e) {
+			throw exceptionConverter.convert(e);
+		}
 	}
 
 	@Override
 	public boolean move(int offset) {
-		return this.cursor.move(offset);
+		try {
+			return this.cursor.move(offset);
+		} catch (SQLException e) {
+			throw exceptionConverter.convert(e);
+		}
 	}
 
 	@Override
 	public boolean moveToPosition(int position) {
-		return this.cursor.moveToPosition(position);
+		try {
+			return this.cursor.moveToPosition(position);
+		} catch (SQLException e) {
+			throw exceptionConverter.convert(e);
+		}
 	}
 
 	@Override
 	public boolean moveToFirst() {
-		return this.cursor.moveToFirst();
+		try {
+			return this.cursor.moveToFirst();
+		} catch (SQLException e) {
+			throw exceptionConverter.convert(e);
+		}
 	}
 
 	@Override
 	public boolean moveToLast() {
-		return this.cursor.moveToLast();
+		try {
+			return this.cursor.moveToLast();
+		} catch (SQLException e) {
+			throw exceptionConverter.convert(e);
+		}
 	}
 
 	@Override
 	public boolean moveToNext() {
-		return this.cursor.moveToNext();
+		try {
+			return this.cursor.moveToNext();
+		} catch (SQLException e) {
+			throw exceptionConverter.convert(e);
+		}
 	}
 
 	@Override
 	public boolean moveToPrevious() {
-		return this.cursor.moveToPrevious();
+		try {
+			return this.cursor.moveToPrevious();
+		} catch (SQLException e) {
+			throw exceptionConverter.convert(e);
+		}
 	}
 
 	@Override
 	public boolean isFirst() {
-		return this.cursor.isFirst();
+		try {
+			return this.cursor.isFirst();
+		} catch (SQLException e) {
+			throw exceptionConverter.convert(e);
+		}
 	}
 
 	@Override
 	public boolean isLast() {
-		return this.cursor.isLast();
+		try {
+			return this.cursor.isLast();
+		} catch (SQLException e) {
+			throw exceptionConverter.convert(e);
+		}
 	}
 
 	@Override
 	public boolean isBeforeFirst() {
-		return this.cursor.isBeforeFirst();
+		try {
+			return this.cursor.isBeforeFirst();
+		} catch (SQLException e) {
+			throw exceptionConverter.convert(e);
+		}
 	}
 
 	@Override
 	public boolean isAfterLast() {
-		return this.cursor.isAfterLast();
+		try {
+			return this.cursor.isAfterLast();
+		} catch (SQLException e) {
+			throw exceptionConverter.convert(e);
+		}
 	}
 
 	@Override
 	public void deactivate() {
-		this.cursor.deactivate();
+		try {
+			this.cursor.deactivate();
+		} catch (SQLException e) {
+			throw exceptionConverter.convert(e);
+		}
 	}
 
 	@Override
 	public boolean requery() {
-		return this.cursor.requery();
+		try {
+			return this.cursor.requery();
+		} catch (SQLException e) {
+			throw exceptionConverter.convert(e);
+		}
 	}
 
 	@Override
 	public void close() {
-		this.cursor.close();
+		try {
+			this.cursor.close();
+		} catch (SQLException e) {
+			throw exceptionConverter.convert(e);
+		}
 	}
 
 	@Override
 	public boolean isClosed() {
-		return this.cursor.isClosed();
+		try {
+			return this.cursor.isClosed();
+		} catch (SQLException e) {
+			throw exceptionConverter.convert(e);
+		}
 	}
-
 }

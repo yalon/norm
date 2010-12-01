@@ -5,7 +5,7 @@ import java.sql.SQLException;
 import com.yalon.norm.NormSQLException;
 import com.yalon.norm.NormUniqueConstraintException;
 
-public class SqliteSQLExceptionConverter implements SQLExceptionConverter {
+public class SqliteSQLExceptionConverter implements JDBCSQLExceptionConverter {
 	public NormSQLException convert(SQLException e) {
 		final String message = e.getMessage();
 		NormSQLException result = null;

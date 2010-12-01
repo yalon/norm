@@ -8,10 +8,10 @@ import com.yalon.norm.Statement;
 
 public class JDBCPreparedStatement implements Statement {
 	java.sql.PreparedStatement stmt;
-	SQLExceptionConverter sqlExceptionConverter;
+	JDBCSQLExceptionConverter sqlExceptionConverter;
 
 	public JDBCPreparedStatement(java.sql.PreparedStatement stmt,
-			SQLExceptionConverter sqlExceptionConverter) {
+			JDBCSQLExceptionConverter sqlExceptionConverter) {
 		this.stmt = stmt;
 		this.sqlExceptionConverter = sqlExceptionConverter;
 	}

@@ -12,9 +12,9 @@ import com.yalon.norm.Statement;
 public class JDBCDatabase implements Database {
 	protected Connection conn;
 	private boolean successful;
-	private SQLExceptionConverter sqlExceptionConverter;
+	private JDBCSQLExceptionConverter sqlExceptionConverter;
 
-	public JDBCDatabase(Connection conn, SQLExceptionConverter sqlExceptionConverter) {
+	public JDBCDatabase(Connection conn, JDBCSQLExceptionConverter sqlExceptionConverter) {
 		this.conn = conn;
 		this.sqlExceptionConverter = sqlExceptionConverter;
 		this.successful = false;
