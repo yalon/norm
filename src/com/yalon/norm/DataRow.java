@@ -37,8 +37,7 @@ public interface DataRow {
 	 * @throws IllegalArgumentException
 	 *             if the column does not exist
 	 */
-	int getColumnIndexOrThrow(String columnName)
-			throws IllegalArgumentException;
+	int getColumnIndexOrThrow(String columnName) throws IllegalArgumentException;
 
 	/**
 	 * Returns the column name at the given zero-based column index.
@@ -70,9 +69,9 @@ public interface DataRow {
 	byte[] getBlob(int columnIndex);
 
 	boolean getBoolean(int columnIndex);
-	
+
 	char getCharacter(int columnIndex);
-	
+
 	byte getByte(int columnIndex);
 
 	/**

@@ -143,8 +143,7 @@ public abstract class TableBuilderBase {
 			return sql.toString();
 		}
 
-		private void appendConflictAlgorithm(StringBuilder sql,
-				ConflictAlgorithm alg) {
+		private void appendConflictAlgorithm(StringBuilder sql, ConflictAlgorithm alg) {
 			if (alg != null) {
 				sql.append(" ON CONFLICT ");
 				sql.append(ConflictAlgorithm.toString(alg));

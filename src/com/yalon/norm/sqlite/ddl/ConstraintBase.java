@@ -2,7 +2,7 @@ package com.yalon.norm.sqlite.ddl;
 
 import java.util.ArrayList;
 
-/* package */ abstract class ConstraintBase {
+/* package */abstract class ConstraintBase {
 	public static class Column {
 		String name;
 		String collate;
@@ -45,7 +45,7 @@ import java.util.ArrayList;
 	protected boolean unique;
 	protected ArrayList<Column> columns;
 
-	/* package */  ConstraintBase(String tableName, String name) {
+	/* package */ConstraintBase(String tableName, String name) {
 		this.tableName = tableName;
 		this.name = name;
 		this.unique = false;

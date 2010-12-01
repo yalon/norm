@@ -117,9 +117,10 @@ public class EntityMapper {
 
 		buildPolymorphismMapping(e);
 
-		// We do this after biuldPolymorphismMapping because we may get the table name from one
+		// We do this after biuldPolymorphismMapping because we may get the
+		// table name from one
 		// of our parent.
-		if (tableName.isEmpty()) { 
+		if (tableName.isEmpty()) {
 			tableName = Inflector.tableize(clazz);
 		}
 	}
@@ -133,29 +134,23 @@ public class EntityMapper {
 				// Make sure the child is a YES or AUTO.
 				if (polymorphic == Entity.Polyphormic.NO) {
 					throw new NormSQLException("class " + clazz
-							+ " defined as non-polyphormic, but anscestor "
-							+ parent.clazz + " is.");
+							+ " defined as non-polyphormic, but anscestor " + parent.clazz + " is.");
 				}
 				polymorphic = Entity.Polyphormic.YES;
 
 				// Make sure the column is the same.
 				if (!polymorphicColumn.isEmpty()
 						&& !polymorphicColumn.equals(parent.polymorphicColumn)) {
-					throw new NormSQLException(
-							"class "
-									+ clazz
-									+ " defined as polyphormic with a different type column ("
-									+ e.polyColumn() + ") than its anscestor ("
-									+ parent.polymorphicColumn + ")");
+					throw new NormSQLException("class " + clazz
+							+ " defined as polyphormic with a different type column ("
+							+ e.polyColumn() + ") than its anscestor (" + parent.polymorphicColumn
+							+ ")");
 				}
 
 				if (!tableName.isEmpty() && !tableName.equals(parent.tableName)) {
-					throw new NormSQLException(
-							"class "
-									+ clazz
-									+ " defined as polymorphic with a different table ("
-									+ tableName + ") than its anscetor ("
-									+ parent.tableName + ")");
+					throw new NormSQLException("class " + clazz
+							+ " defined as polymorphic with a different table (" + tableName
+							+ ") than its anscetor (" + parent.tableName + ")");
 				}
 				polymorphicColumn = parent.polymorphicColumn;
 				tableName = parent.tableName;
@@ -173,15 +168,11 @@ public class EntityMapper {
 				polymorphic = Entity.Polyphormic.NO;
 			}
 
-			if (polymorphic == Entity.Polyphormic.NO
-					&& !polymorphicColumn.isEmpty()) {
-				throw new NormSQLException(
-						"class "
-								+ clazz
-								+ " is not polymorphic, but still you defined polyColumn");
+			if (polymorphic == Entity.Polyphormic.NO && !polymorphicColumn.isEmpty()) {
+				throw new NormSQLException("class " + clazz
+						+ " is not polymorphic, but still you defined polyColumn");
 			}
-			if (polymorphic == Entity.Polyphormic.YES
-					&& e.polyColumn().isEmpty()) {
+			if (polymorphic == Entity.Polyphormic.YES && e.polyColumn().isEmpty()) {
 				polymorphicColumn = DEFAULT_POLYMORPHIC_COLUMN;
 			}
 		}
@@ -212,8 +203,7 @@ public class EntityMapper {
 
 			if (f.getType().isEnum()) {
 				mappers.add(new EnumTypeMapper(columnName, f));
-			} else if (ReflectionUtils.isPrimitiveOrPrimitiveWrapper(f
-					.getType()) || f.getType() == byte[].class) {
+			} else if (ReflectionUtils.isDatabasePrimitiveType(f.getType())) {
 				mappers.add(new PrimitiveTypeMapper(columnName, f));
 			}
 			// TODO: allow custom mapping here, arrays of stuff, etc.

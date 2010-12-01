@@ -8,9 +8,12 @@ import com.yalon.norm.Statement;
 
 public class JDBCPreparedStatement implements Statement {
 	java.sql.PreparedStatement stmt;
+	SQLExceptionConverter sqlExceptionConverter;
 
-	public JDBCPreparedStatement(java.sql.PreparedStatement stmt) {
+	public JDBCPreparedStatement(java.sql.PreparedStatement stmt,
+			SQLExceptionConverter sqlExceptionConverter) {
 		this.stmt = stmt;
+		this.sqlExceptionConverter = sqlExceptionConverter;
 	}
 
 	@Override
@@ -18,7 +21,7 @@ public class JDBCPreparedStatement implements Statement {
 		try {
 			stmt.execute();
 		} catch (SQLException e) {
-			throw new NormSQLException(e);
+			throw sqlExceptionConverter.convert(e);
 		}
 	}
 
@@ -31,8 +34,7 @@ public class JDBCPreparedStatement implements Statement {
 					if (rs.next()) {
 						return rs.getLong(1);
 					} else {
-						throw new NormSQLException(
-								"generatedKeys didn't return a result");
+						throw new NormSQLException("generatedKeys didn't return a result");
 					}
 				} finally {
 					rs.close();
@@ -40,7 +42,7 @@ public class JDBCPreparedStatement implements Statement {
 			}
 			return 0;
 		} catch (SQLException e) {
-			throw new NormSQLException(e);
+			throw sqlExceptionConverter.convert(e);
 		}
 	}
 
@@ -59,7 +61,7 @@ public class JDBCPreparedStatement implements Statement {
 				rs.close();
 			}
 		} catch (SQLException e) {
-			throw new NormSQLException(e);
+			throw sqlExceptionConverter.convert(e);
 		}
 	}
 
@@ -78,7 +80,7 @@ public class JDBCPreparedStatement implements Statement {
 				rs.close();
 			}
 		} catch (SQLException e) {
-			throw new NormSQLException(e);
+			throw sqlExceptionConverter.convert(e);
 		}
 	}
 
@@ -87,7 +89,16 @@ public class JDBCPreparedStatement implements Statement {
 		try {
 			stmt.setNull(index - 1, stmt.getMetaData().getColumnType(index - 1));
 		} catch (SQLException e) {
-			throw new NormSQLException(e);
+			throw sqlExceptionConverter.convert(e);
+		}
+	}
+
+	@Override
+	public void bindInt(int index, int value) {
+		try {
+			stmt.setInt(index - 1, value);
+		} catch (SQLException e) {
+			throw sqlExceptionConverter.convert(e);
 		}
 	}
 
@@ -96,7 +107,7 @@ public class JDBCPreparedStatement implements Statement {
 		try {
 			stmt.setLong(index - 1, value);
 		} catch (SQLException e) {
-			throw new NormSQLException(e);
+			throw sqlExceptionConverter.convert(e);
 		}
 	}
 
@@ -105,7 +116,7 @@ public class JDBCPreparedStatement implements Statement {
 		try {
 			stmt.setDouble(index - 1, value);
 		} catch (SQLException e) {
-			throw new NormSQLException(e);
+			throw sqlExceptionConverter.convert(e);
 		}
 	}
 
@@ -114,7 +125,7 @@ public class JDBCPreparedStatement implements Statement {
 		try {
 			stmt.setString(index - 1, value);
 		} catch (SQLException e) {
-			throw new NormSQLException(e);
+			throw sqlExceptionConverter.convert(e);
 		}
 	}
 
@@ -123,7 +134,7 @@ public class JDBCPreparedStatement implements Statement {
 		try {
 			stmt.setBytes(index - 1, value);
 		} catch (SQLException e) {
-			throw new NormSQLException(e);
+			throw sqlExceptionConverter.convert(e);
 		}
 	}
 
@@ -132,7 +143,7 @@ public class JDBCPreparedStatement implements Statement {
 		try {
 			stmt.clearParameters();
 		} catch (SQLException e) {
-			throw new NormSQLException(e);
+			throw sqlExceptionConverter.convert(e);
 		}
 	}
 
@@ -141,7 +152,7 @@ public class JDBCPreparedStatement implements Statement {
 		try {
 			stmt.close();
 		} catch (SQLException e) {
-			throw new NormSQLException(e);
+			throw sqlExceptionConverter.convert(e);
 		}
 	}
 }

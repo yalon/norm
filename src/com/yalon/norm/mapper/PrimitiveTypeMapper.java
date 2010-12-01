@@ -25,9 +25,8 @@ public class PrimitiveTypeMapper implements Mapper {
 					+ " is missing from the SQL query for field " + field);
 		}
 		if (row.isNull(columnIndex) && field.getType().isPrimitive()) {
-			throw new NormSQLException("field " + field
-					+ " is primitive, but got NULL column " + columnName
-					+ " for it");
+			throw new NormSQLException("field " + field + " is primitive, but got NULL column "
+					+ columnName + " for it");
 		}
 
 		Class<?> fieldType = field.getType();
@@ -55,8 +54,7 @@ public class PrimitiveTypeMapper implements Mapper {
 		} else if (fieldType == byte[].class) {
 			value = row.getBlob(columnIndex);
 		} else {
-			throw new NormException("field " + field
-					+ " isn't of primitive type");
+			throw new NormException("field " + field + " isn't of primitive type");
 		}
 
 		ReflectionUtils.setFieldValue(field, obj, value);
@@ -69,7 +67,6 @@ public class PrimitiveTypeMapper implements Mapper {
 	}
 
 	public String toString() {
-		return "PrimitiveTypeMapper(columnName=" + columnName + ", field="
-				+ field + ")";
+		return "PrimitiveTypeMapper(columnName=" + columnName + ", field=" + field + ")";
 	}
 }

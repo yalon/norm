@@ -1,14 +1,12 @@
 package com.yalon.norm.test;
 
 import java.io.File;
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 
 import junit.framework.TestCase;
 
 import com.yalon.norm.Cursor;
-import com.yalon.norm.adapter.jdbc.JDBCDatabase;
+import com.yalon.norm.adapter.jdbc.SqliteJDBCDatabase;
 import com.yalon.norm.sqlite.ddl.ColumnType;
 import com.yalon.norm.sqlite.ddl.ConflictAlgorithm;
 import com.yalon.norm.sqlite.ddl.TableBuilder;
@@ -16,23 +14,19 @@ import com.yalon.norm.sqlite.ddl.TableBuilderBase.UniqueConstraint;
 import com.yalon.norm.sqlite.ddl.TableEditor;
 
 public class TestSqliteTableEditor extends TestCase {
-	Connection conn;
-	JDBCDatabase db;
+	SqliteJDBCDatabase db;
 	TableEditor editor;
-
 
 	@Override
 	protected void setUp() throws Exception {
 		new File("unittest.db").delete();
-		Class.forName("org.sqlite.JDBC");
-		conn = DriverManager.getConnection("jdbc:sqlite:unittest.db");
-		db = new JDBCDatabase(conn);
+		db = new SqliteJDBCDatabase("unittest.db");
 		editor = new TableEditor(db);
 	}
 
 	@Override
 	protected void tearDown() throws SQLException {
-		conn.close();
+		db.close();
 	}
 
 	public TestSqliteTableEditor(String name) {
@@ -88,8 +82,7 @@ public class TestSqliteTableEditor extends TestCase {
 		t.integer("bool").defaultValue(false);
 		assertEquals("CREATE TABLE test ("
 				+ "id INTEGER PRIMARY KEY DESC ON CONFLICT ABORT NOT NULL"
-				+ ", vec REAL DEFAULT '1.5', bool INTEGER DEFAULT 0)",
-				t.toCreateSQL());
+				+ ", vec REAL DEFAULT '1.5', bool INTEGER DEFAULT 0)", t.toCreateSQL());
 	}
 
 	public void testCreateSQL_Constraint() {
@@ -99,9 +92,8 @@ public class TestSqliteTableEditor extends TestCase {
 		UniqueConstraint constraint = t.uniqueConstraint();
 		constraint.column("id").desc();
 		constraint.column("name");
-		assertEquals(
-				"CREATE TABLE test (id INTEGER PRIMARY KEY ASC, name TEXT)"
-						+ " UNIQUE (id DESC, name ASC)", t.toCreateSQL());
+		assertEquals("CREATE TABLE test (id INTEGER PRIMARY KEY ASC, name TEXT)"
+				+ " UNIQUE (id DESC, name ASC)", t.toCreateSQL());
 	}
 
 	public void testCreate() throws Exception {
@@ -112,7 +104,7 @@ public class TestSqliteTableEditor extends TestCase {
 		t.create();
 		db.execSQL("SELECT id, vec FROM test");
 	}
-	
+
 	public void testCopy() {
 		TableBuilder t = editor.build("test");
 		t.integer("col1");
@@ -125,9 +117,9 @@ public class TestSqliteTableEditor extends TestCase {
 
 		db.execSQL("INSERT INTO test (col1, col2) VALUES (1, 2)");
 		db.execSQL("INSERT INTO test (col1, col2) VALUES (2, 4)");
-		
+
 		editor.copy("test", "test2");
-		
+
 		Cursor cur = db.execQuerySQL("SELECT col1 FROM test2");
 		try {
 			assertTrue(cur.moveToNext());

@@ -57,17 +57,16 @@ public class AlterTableBuilder extends TableBuilderBase {
 	public UniqueConstraint addUniqueConstraint(String name) {
 		return addUniqueConstraint(name, null);
 	}
-	
+
 	public UniqueConstraint dropUniqueConstraint() {
 		return dropUniqueConstraint(null);
 	}
-	
+
 	public UniqueConstraint dropUniqueConstraint(String name) {
 		return dropUniqueConstraint(name);
 	}
-	
-	public UniqueConstraint addUniqueConstraint(String constraintName,
-			ConflictAlgorithm alg) {
+
+	public UniqueConstraint addUniqueConstraint(String constraintName, ConflictAlgorithm alg) {
 		UniqueConstraint constraint = new UniqueConstraint(constraintName, alg);
 		addUniqueConstraints.add(constraint);
 		return constraint;
@@ -76,7 +75,7 @@ public class AlterTableBuilder extends TableBuilderBase {
 	public void alter() {
 		alter(false);
 	}
-	
+
 	public void alter(boolean forceNewTable) {
 
 	}

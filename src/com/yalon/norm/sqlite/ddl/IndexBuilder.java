@@ -6,7 +6,7 @@ public class IndexBuilder extends ConstraintBase {
 	protected Database db;
 	protected boolean createIfNotExists;
 
-	/* package */  IndexBuilder(Database db, String tableName, String name) {
+	/* package */IndexBuilder(Database db, String tableName, String name) {
 		super(tableName, name);
 		this.createIfNotExists = false;
 	}

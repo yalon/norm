@@ -10,6 +10,8 @@ public interface Statement {
 	String simpleQueryForString();
 
 	void bindNull(int index);
+	
+	void bindInt(int index, int value);
 
 	void bindLong(int index, long value);
 

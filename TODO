@@ -1,5 +1,35 @@
 - Query: support batch sizes in queries.
 
+SELECT $Foo FROM $Foo.table WHERE $Foo.col1 > ? AND $Foo.col2 < 100 OR $Foo.attr.col3 LIKE ?
+
+issues to be delt with:
+- object identity.
+  - what defines an object? its primary key if it has one, otherwise _all_ the columns mapped.
+  - why needed? 
+    - to do insertOrUpdate (e.g. save()).
+    - to cache objects in a transaction (or between transactions/threads). very relevant for android
+      since a single process accesses the DB, so a cache can save reads/writes to the DB.
+  - requires a generic query/insert/update/delete mechanism
+- implicit saving, i.e. dirty objects.
+  - unless the fields have getter/setter that sets the dirty bit there's no way to determine if the
+    object is dirty other than to keep a copy of it and compare its fields
+- query/insert/update/delete
+- relationships (belongs to, has a, many-to-many)
+  - if we'll fetch a relationship using a JOIN, our current entity mapper class is still okay because
+    we can say the column name is "table_x.col1"
+  - if we'll want to set proxies for collections or one-to-one relationships, we'll have to extend
+    entity mapper so it'll put these collections.
+- custom queries
+- partial queries (get only part of the object)
+- aggregate functions (group by, sum, etc.)
+
+so we have a multi-layered architecture:
+- base: connection/db abstraction (where possible). classes: Database, DataRow , Cursor, Statement
+  can be used with jdbc and android's native sqlite. does trivial mapping of java types to db types.
+- entity mapper: generic way to map a DataRow into an object and vice-versa.
+ 
+===================================================================================================
+
 Database Engines
 ----------------
 - Database: support native Sqlite on Android

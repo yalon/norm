@@ -78,7 +78,7 @@ public class EntityDAO<T> {
 		sql.append(")");
 		db.execSQL(sql.toString(), values);
 	}
-	
+
 	public void update(T obj, ConflictAlgorithm conflictResolution) {
 		HashMap<String, Object> row = new HashMap<String, Object>();
 		map.mapObjectToRow(obj, row);
@@ -90,7 +90,7 @@ public class EntityDAO<T> {
 			sql.append(" OR ");
 			sql.append(ConflictAlgorithm.toString(conflictResolution));
 		}
-		
+
 		sql.append(mapper.getTableName());
 		sql.append(" SET");
 		String sep = " ";

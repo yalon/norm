@@ -119,11 +119,10 @@ public class ReflectionUtils {
 		}
 	}
 
-	public static boolean isPrimitiveOrPrimitiveWrapper(Class<?> clazz) {
-		return clazz.isPrimitive() || clazz == Boolean.class
-				|| clazz == Short.class || clazz == Integer.class
-				|| clazz == Long.class || clazz == Float.class
-				|| clazz == Double.class || clazz == Character.class
-				|| clazz == Byte.class || clazz == String.class;
+	public static boolean isDatabasePrimitiveType(Class<?> clazz) {
+		return clazz.isPrimitive() || clazz == Boolean.class || clazz == Short.class
+				|| clazz == Integer.class || clazz == Long.class || clazz == Float.class
+				|| clazz == Double.class || clazz == Character.class || clazz == Byte.class
+				|| clazz == String.class || clazz == byte[].class;
 	}
 }

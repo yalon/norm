@@ -12,8 +12,7 @@ public class JDBCCursor implements Cursor {
 	ResultSet resultSet;
 	boolean closeStatement;
 
-	public JDBCCursor(Statement stmt, ResultSet resultSet,
-			boolean closeStatement) {
+	public JDBCCursor(Statement stmt, ResultSet resultSet, boolean closeStatement) {
 		this.stmt = stmt;
 		this.resultSet = resultSet;
 		this.closeStatement = closeStatement;
@@ -147,8 +146,7 @@ public class JDBCCursor implements Cursor {
 	}
 
 	@Override
-	public int getColumnIndexOrThrow(String columnName)
-			throws IllegalArgumentException {
+	public int getColumnIndexOrThrow(String columnName) throws IllegalArgumentException {
 		int idx = getColumnIndex(columnName);
 		if (idx == -1) {
 			throw new IllegalArgumentException();

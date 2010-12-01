@@ -7,16 +7,21 @@ import java.util.Locale;
 
 import com.yalon.norm.Cursor;
 import com.yalon.norm.Database;
-import com.yalon.norm.NormSQLException;
 import com.yalon.norm.Statement;
 
 public class JDBCDatabase implements Database {
-	private Connection conn;
+	protected Connection conn;
 	private boolean successful;
+	private SQLExceptionConverter sqlExceptionConverter;
 
-	public JDBCDatabase(Connection conn) {
+	public JDBCDatabase(Connection conn, SQLExceptionConverter sqlExceptionConverter) {
 		this.conn = conn;
+		this.sqlExceptionConverter = sqlExceptionConverter;
 		this.successful = false;
+	}
+	
+	protected void setConnection(Connection conn) {
+		this.conn = conn;
 	}
 
 	@Override
@@ -25,7 +30,7 @@ public class JDBCDatabase implements Database {
 			conn.setAutoCommit(false);
 			successful = false;
 		} catch (SQLException e) {
-			throw new NormSQLException(e);
+			throw sqlExceptionConverter.convert(e);
 		}
 	}
 
@@ -39,7 +44,7 @@ public class JDBCDatabase implements Database {
 			}
 			conn.setAutoCommit(true);
 		} catch (SQLException e) {
-			throw new NormSQLException(e);
+			throw sqlExceptionConverter.convert(e);
 		}
 	}
 
@@ -53,7 +58,7 @@ public class JDBCDatabase implements Database {
 		try {
 			return conn.getAutoCommit() == false;
 		} catch (SQLException e) {
-			throw new NormSQLException(e);
+			throw sqlExceptionConverter.convert(e);
 		}
 	}
 
@@ -62,16 +67,16 @@ public class JDBCDatabase implements Database {
 		try {
 			conn.close();
 		} catch (SQLException e) {
-			throw new NormSQLException(e);
+			throw sqlExceptionConverter.convert(e);
 		}
 	}
 
 	@Override
 	public Statement compileStatement(String sql) {
 		try {
-			return new JDBCPreparedStatement(conn.prepareStatement(sql));
+			return new JDBCPreparedStatement(conn.prepareStatement(sql), sqlExceptionConverter);
 		} catch (SQLException e) {
-			throw new NormSQLException(e);
+			throw sqlExceptionConverter.convert(e);
 		}
 	}
 
@@ -85,7 +90,7 @@ public class JDBCDatabase implements Database {
 				stmt.close();
 			}
 		} catch (SQLException e) {
-			throw new NormSQLException(e);
+			throw sqlExceptionConverter.convert(e);
 		}
 	}
 
@@ -102,7 +107,7 @@ public class JDBCDatabase implements Database {
 				stmt.close();
 			}
 		} catch (SQLException e) {
-			throw new NormSQLException(e);
+			throw sqlExceptionConverter.convert(e);
 		}
 	}
 
@@ -113,7 +118,7 @@ public class JDBCDatabase implements Database {
 			ResultSet rs = stmt.executeQuery(sql);
 			return new JDBCCursor(stmt, rs, true);
 		} catch (SQLException e) {
-			throw new NormSQLException(e);
+			throw sqlExceptionConverter.convert(e);
 		}
 	}
 
@@ -127,7 +132,7 @@ public class JDBCDatabase implements Database {
 			ResultSet rs = stmt.executeQuery();
 			return new JDBCCursor(stmt, rs, true);
 		} catch (SQLException e) {
-			throw new NormSQLException(e);
+			throw sqlExceptionConverter.convert(e);
 		}
 	}
 
@@ -136,7 +141,7 @@ public class JDBCDatabase implements Database {
 		try {
 			return conn.isReadOnly();
 		} catch (SQLException e) {
-			throw new NormSQLException(e);
+			throw sqlExceptionConverter.convert(e);
 		}
 	}
 
@@ -145,7 +150,7 @@ public class JDBCDatabase implements Database {
 		try {
 			return !conn.isClosed();
 		} catch (SQLException e) {
-			throw new NormSQLException(e);
+			throw sqlExceptionConverter.convert(e);
 		}
 	}
 

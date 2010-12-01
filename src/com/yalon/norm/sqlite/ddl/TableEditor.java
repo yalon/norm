@@ -47,8 +47,7 @@ public class TableEditor {
 		copy(fromTableName, toTableName, mapping);
 	}
 
-	public void copy(String fromTableName, String toTableName,
-			Map<String, String> columnMapping) {
+	public void copy(String fromTableName, String toTableName, Map<String, String> columnMapping) {
 		StringBuilder fromColumnList = new StringBuilder();
 		StringBuilder toColumnList = new StringBuilder();
 		String sep = "";
@@ -71,8 +70,7 @@ public class TableEditor {
 	}
 
 	public void rename(String fromTableName, String toTableName) {
-		db.execSQL("ALTER TABLE "
-				+ DatabaseUtils.sqlEscapeString(fromTableName) + " RENAME TO "
+		db.execSQL("ALTER TABLE " + DatabaseUtils.sqlEscapeString(fromTableName) + " RENAME TO "
 				+ DatabaseUtils.sqlEscapeString(toTableName));
 	}
 

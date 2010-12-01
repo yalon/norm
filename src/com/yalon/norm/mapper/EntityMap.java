@@ -34,8 +34,7 @@ public class EntityMap {
 			}
 
 			if (!clazz.isAnnotationPresent(Entity.class)) {
-				throw new NormSQLException("class " + clazz
-						+ " is not an entity");
+				throw new NormSQLException("class " + clazz + " is not an entity");
 			}
 
 			// We need to map the parents first from top to bottom, and only

@@ -10,7 +10,7 @@ public class TableBuilder extends TableBuilderBase {
 	ArrayList<Column> columns;
 	ArrayList<UniqueConstraint> uniqueConstraints;
 
-	/* package */ TableBuilder(Database db, String name) {
+	/* package */TableBuilder(Database db, String name) {
 		super(db, name);
 		this.temporary = false;
 		this.columns = new ArrayList<Column>();
@@ -47,7 +47,7 @@ public class TableBuilder extends TableBuilderBase {
 	public UniqueConstraint uniqueConstraint() {
 		return uniqueConstraint(null, null);
 	}
-	
+
 	public UniqueConstraint uniqueConstraint(ConflictAlgorithm alg) {
 		return uniqueConstraint(null, alg);
 	}
@@ -56,8 +56,7 @@ public class TableBuilder extends TableBuilderBase {
 		return uniqueConstraint(name, null);
 	}
 
-	public UniqueConstraint uniqueConstraint(String constraintName,
-			ConflictAlgorithm alg) {
+	public UniqueConstraint uniqueConstraint(String constraintName, ConflictAlgorithm alg) {
 		UniqueConstraint constraint = new UniqueConstraint(constraintName, alg);
 		uniqueConstraints.add(constraint);
 		return constraint;

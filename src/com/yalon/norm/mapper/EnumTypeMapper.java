@@ -13,7 +13,7 @@ public class EnumTypeMapper implements Mapper {
 	String columnName;
 	Field field;
 	Object[] values;
-	
+
 	public EnumTypeMapper(String columnName, Field field) {
 		this.columnName = columnName;
 		this.field = field;
@@ -24,7 +24,7 @@ public class EnumTypeMapper implements Mapper {
 			values[i] = Array.get(arr, i);
 		}
 	}
-	
+
 	@Override
 	public void mapRowToObject(DataRow row, Object obj) {
 		int columnIndex = row.getColumnIndex(columnName);
