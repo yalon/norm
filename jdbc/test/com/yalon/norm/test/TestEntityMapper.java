@@ -25,7 +25,7 @@ public class TestEntityMapper extends TestCase {
 
 	public void testSimpleMapping() throws Exception {
 		EntityMap entityMap = new EntityMap();
-		entityMap.put(Foo2.class);
+		entityMap.putIfNotExists(Foo2.class);
 		System.out.println(entityMap.get(Foo2.class));
 	}
 }

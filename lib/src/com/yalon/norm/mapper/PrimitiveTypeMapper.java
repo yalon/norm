@@ -11,10 +11,12 @@ import com.yalon.norm.utils.ReflectionUtils;
 public class PrimitiveTypeMapper implements Mapper {
 	String columnName;
 	Field field;
+	boolean mapObjectToRow;
 
-	public PrimitiveTypeMapper(String columnName, Field field) {
+	public PrimitiveTypeMapper(String columnName, Field field, boolean mapObjectToRow) {
 		this.columnName = columnName;
 		this.field = field;
+		this.mapObjectToRow = mapObjectToRow;
 	}
 
 	@Override
@@ -62,11 +64,15 @@ public class PrimitiveTypeMapper implements Mapper {
 
 	@Override
 	public void mapObjectToRow(Object obj, Map<String, Object> row) {
+		if (!mapObjectToRow) {
+			return;
+		}
 		Object value = ReflectionUtils.getFieldValue(field, obj);
 		row.put(columnName, value);
 	}
 
 	public String toString() {
-		return "PrimitiveTypeMapper(columnName=" + columnName + ", field=" + field + ")";
+		return "PrimitiveTypeMapper(columnName=" + columnName + ", field=" + field
+				+ ", mapObjectToRow=" + mapObjectToRow + ")";
 	}
 }

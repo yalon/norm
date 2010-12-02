@@ -27,14 +27,10 @@ public class EntityMap {
 		return mapper;
 	}
 
-	public void put(Class<?> clazz) {
+	public void putIfNotExists(Class<?> clazz) {
 		synchronized (classToEntityMapper) {
 			if (classToEntityMapper.containsKey(clazz)) {
 				return;
-			}
-
-			if (!clazz.isAnnotationPresent(Entity.class)) {
-				throw new NormSQLException("class " + clazz + " is not an entity");
 			}
 
 			// We need to map the parents first from top to bottom, and only
@@ -57,6 +53,10 @@ public class EntityMap {
 						parentMapper = mapper;
 					}
 				}
+			}
+
+			if (parentMapper == null && !clazz.isAnnotationPresent(Entity.class)) {
+				throw new NormSQLException("class " + clazz + " is not an entity");
 			}
 
 			EntityMapper mapper = new EntityMapper(parentMapper, clazz);

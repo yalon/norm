@@ -75,8 +75,8 @@ public class TestEntityDAO extends TestCase {
 		t.text("type");
 		t.create();
 
-		entityMap.put(Foo.class);	// Not really needed, will get mapped implicitly due to Foo2.
-		entityMap.put(Foo2.class);
+		entityMap.putIfNotExists(Foo.class);	// Not really needed, will get mapped implicitly due to Foo2.
+		entityMap.putIfNotExists(Foo2.class);
 		
 		EntityDAO<Foo2> foo2DAO = new EntityDAO<Foo2>(db, entityMap, Foo2.class);
 		foo2DAO.insert(new Foo2(2, 42));

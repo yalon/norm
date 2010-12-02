@@ -108,7 +108,7 @@ public class EntityMapper {
 
 	protected void createMap() {
 		Entity e = clazz.getAnnotation(Entity.class);
-		tableName = e.table();
+		tableName = e != null ? e.table() : parent.getTableName();
 
 		// TODO: find the before/after filters.
 		// for (Method m : clazz.getDeclaredMethods()) {
@@ -128,8 +128,9 @@ public class EntityMapper {
 
 	protected void buildPolymorphismMapping(Entity e) {
 		// See if ancestors support polymorphism.
-		polymorphic = e.polymorphic();
-		polymorphicColumn = e.polyColumn();
+		polymorphic = e != null ? e.polymorphic() : parent.polymorphic;
+		polymorphicColumn = e != null ? e.polyColumn() : parent.polymorphicColumn;
+
 		if (parent != null) {
 			if (parent.polymorphic == Entity.Polyphormic.YES) {
 				// Make sure the child is a YES or AUTO.
@@ -203,9 +204,9 @@ public class EntityMapper {
 			}
 
 			if (f.getType().isEnum()) {
-				mappers.add(new EnumTypeMapper(columnName, f));
+				mappers.add(new EnumTypeMapper(columnName, f, !col.dbToObjectOnly()));
 			} else if (ReflectionUtils.isDatabasePrimitiveType(f.getType())) {
-				mappers.add(new PrimitiveTypeMapper(columnName, f));
+				mappers.add(new PrimitiveTypeMapper(columnName, f, !col.dbToObjectOnly()));
 			}
 			// TODO: allow custom mapping here, arrays of stuff, etc.
 

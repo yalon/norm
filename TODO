@@ -29,15 +29,9 @@ so we have a multi-layered architecture:
 - entity mapper: generic way to map a DataRow into an object and vice-versa.
  
 ===================================================================================================
-
-Database Engines
-----------------
-- Database: support native Sqlite on Android
-
 General
 -------
 - Exceptions: go over all exceptions and create specific exceptions
-- Exceptions: unify SQLExceptions coming from the DB (unique constraints, etc.)
 - Name: think of a better name than norm?
 - Documentation and examples
 - Unit tests
@@ -52,6 +46,9 @@ Migrations
 ----------
 - Migrations: provide Java type column constructors (eg. builder.boolean, etc.) so developer will
   not have to make the conversion to DB-specific types in his head.
+  - We can make layer on top of the existing builders that reads the object mapping and creates
+    table definitions. We can then also make it generate code so it'll be saved between model 
+    changes.
 - Migrations: instead of relying on the stupid "database version" (and Android's stupid "upgrade")
   use our own migrations table like Rails.
 - Migrations: provide convenience function with an AlterTableBuilder that you first define the

@@ -3,9 +3,9 @@ package com.yalon.norm.adapter.android;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteStatement;
 
-import com.yalon.norm.Statement;
+import com.yalon.norm.adapter.StatementBase;
 
-public class AndroidStatement implements Statement {
+public class AndroidStatement extends StatementBase {
 	SQLiteStatement statement;
 	AndroidSQLExceptionConverter exceptionConverter;
 
@@ -61,6 +61,21 @@ public class AndroidStatement implements Statement {
 	}
 
 	@Override
+	public void bindBoolean(int index, boolean value) {
+		bindInt(index, value ? 1 : 0);
+	}
+
+	@Override
+	public void bindByte(int index, byte value) {
+		bindInt(index, value);
+	}
+
+	@Override
+	public void bindShort(int index, short value) {
+		bindInt(index, value);
+	}
+
+	@Override
 	public void bindInt(int index, int value) {
 		try {
 			this.statement.bindLong(index, value);
@@ -76,6 +91,11 @@ public class AndroidStatement implements Statement {
 		} catch (SQLException e) {
 			throw this.exceptionConverter.convert(e);
 		}
+	}
+
+	@Override
+	public void bindFloat(int index, float value) {
+		bindDouble(index, value);
 	}
 
 	@Override

@@ -4,9 +4,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import com.yalon.norm.NormSQLException;
-import com.yalon.norm.Statement;
+import com.yalon.norm.adapter.StatementBase;
 
-public class JDBCPreparedStatement implements Statement {
+public class JDBCPreparedStatement extends StatementBase {
 	java.sql.PreparedStatement stmt;
 	JDBCSQLExceptionConverter sqlExceptionConverter;
 
@@ -87,7 +87,34 @@ public class JDBCPreparedStatement implements Statement {
 	@Override
 	public void bindNull(int index) {
 		try {
-			stmt.setNull(index - 1, stmt.getMetaData().getColumnType(index - 1));
+			stmt.setNull(index + 1, stmt.getParameterMetaData().getParameterType(index + 1));
+		} catch (SQLException e) {
+			throw sqlExceptionConverter.convert(e);
+		}
+	}
+
+	@Override
+	public void bindBoolean(int index, boolean value) {
+		try {
+			stmt.setBoolean(index + 1, value);
+		} catch (SQLException e) {
+			throw sqlExceptionConverter.convert(e);
+		}
+	}
+
+	@Override
+	public void bindByte(int index, byte value) {
+		try {
+			stmt.setByte(index + 1, value);
+		} catch (SQLException e) {
+			throw sqlExceptionConverter.convert(e);
+		}
+	}
+
+	@Override
+	public void bindShort(int index, short value) {
+		try {
+			stmt.setShort(index + 1, value);
 		} catch (SQLException e) {
 			throw sqlExceptionConverter.convert(e);
 		}
@@ -96,7 +123,7 @@ public class JDBCPreparedStatement implements Statement {
 	@Override
 	public void bindInt(int index, int value) {
 		try {
-			stmt.setInt(index - 1, value);
+			stmt.setInt(index + 1, value);
 		} catch (SQLException e) {
 			throw sqlExceptionConverter.convert(e);
 		}
@@ -105,7 +132,16 @@ public class JDBCPreparedStatement implements Statement {
 	@Override
 	public void bindLong(int index, long value) {
 		try {
-			stmt.setLong(index - 1, value);
+			stmt.setLong(index + 1, value);
+		} catch (SQLException e) {
+			throw sqlExceptionConverter.convert(e);
+		}
+	}
+
+	@Override
+	public void bindFloat(int index, float value) {
+		try {
+			stmt.setFloat(index + 1, value);
 		} catch (SQLException e) {
 			throw sqlExceptionConverter.convert(e);
 		}
@@ -114,7 +150,7 @@ public class JDBCPreparedStatement implements Statement {
 	@Override
 	public void bindDouble(int index, double value) {
 		try {
-			stmt.setDouble(index - 1, value);
+			stmt.setDouble(index + 1, value);
 		} catch (SQLException e) {
 			throw sqlExceptionConverter.convert(e);
 		}
@@ -123,7 +159,7 @@ public class JDBCPreparedStatement implements Statement {
 	@Override
 	public void bindString(int index, String value) {
 		try {
-			stmt.setString(index - 1, value);
+			stmt.setString(index + 1, value);
 		} catch (SQLException e) {
 			throw sqlExceptionConverter.convert(e);
 		}
@@ -132,7 +168,7 @@ public class JDBCPreparedStatement implements Statement {
 	@Override
 	public void bindBlob(int index, byte[] value) {
 		try {
-			stmt.setBytes(index - 1, value);
+			stmt.setBytes(index + 1, value);
 		} catch (SQLException e) {
 			throw sqlExceptionConverter.convert(e);
 		}

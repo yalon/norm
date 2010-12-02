@@ -2,9 +2,12 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="test"/>
-	<classpathentry kind="lib" path="sqlitejdbc-v056.jar"/>
+	<classpathentry kind="lib" path="sqlitejdbc-v056.jar" sourcepath="sqlitejdbc-v056-src.zip"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/norm_lib"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
+	<classpathentry kind="lib" path="slf4j-api-1.5.8.jar"/>
+	<classpathentry kind="lib" path="log4j-1.2.16.jar" sourcepath="/media/data/tal/src/apache-log4j-1.2.16"/>
+	<classpathentry kind="lib" path="slf4j-log4j12-1.5.8.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

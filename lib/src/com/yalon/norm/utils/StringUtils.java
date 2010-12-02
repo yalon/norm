@@ -7,6 +7,16 @@ public class StringUtils {
 		return s == null || s.length() == 0;
 	}
 
+	public final static <T> String join(T[] array, String delim) {
+		return join(array, delim, "");
+	}
+
+	public final static <T> String join(T[] array, String delim, String initialDelim) {
+		StringBuilder builder = new StringBuilder();
+		join(array, delim, initialDelim, builder);
+		return builder.toString();
+	}
+
 	public final static <T> void join(T[] array, String delim, StringBuilder builder) {
 		join(array, delim, "", builder);
 	}
