@@ -95,6 +95,29 @@ public class EntityMapper {
 		}
 	}
 
+	public String getColumnForField(String fieldName) {
+		SingleColumnMapper mapper = findSingleColumnMapper(fieldName);
+		return mapper.getColumnName();
+	}
+
+	public Object mapFieldValueToColumnTypeValue(String fieldName, Object fieldValue) {
+		SingleColumnMapper mapper = findSingleColumnMapper(fieldName);
+		return mapper.mapFieldValueToDatabasePrimitiveValue(fieldValue);
+	}
+
+	protected SingleColumnMapper findSingleColumnMapper(String fieldName) {
+		// TODO: not very efficient at the moment.
+		for (Mapper mapper : mappers) {
+			if (mapper instanceof SingleColumnMapper) {
+				if (((SingleColumnMapper) mapper).getField().getName().equals(fieldName)) {
+					return (SingleColumnMapper) mapper;
+				}
+			}
+		}
+		throw new NormSQLException("field " + fieldName
+				+ " doesn't map into a single (or any) column");
+	}
+
 	protected void internalMapObjectToRow(Object obj, Map<String, Object> row) {
 		// TODO: call hooks (before/after stuff)
 		if (parent != null) {
@@ -179,16 +202,26 @@ public class EntityMapper {
 			}
 		}
 
+		// Put all of our parents columns on us (regardless of polymorphism).
+		HashSet<String> parentColumns = new HashSet<String>();
+		EntityMapper curParent = parent;
+		while (curParent != null) {
+			parentColumns.addAll(curParent.columns);
+			curParent = curParent.parent;
+		}
+
 		if (polymorphic == Entity.Polyphormic.YES) {
 			columns.add(polymorphicColumn);
 
 			// Put all our columns to all of our parents as well.
-			EntityMapper curParent = parent;
+			curParent = parent;
 			while (curParent != null) {
 				curParent.columns.addAll(columns);
 				curParent = curParent.parent;
 			}
-		}
+		}		
+		
+		columns.addAll(parentColumns);
 	}
 
 	protected void buildDirectFieldMapping() {

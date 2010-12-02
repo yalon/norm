@@ -8,7 +8,7 @@ import com.yalon.norm.NormException;
 import com.yalon.norm.NormSQLException;
 import com.yalon.norm.utils.ReflectionUtils;
 
-public class PrimitiveTypeMapper implements Mapper {
+public class PrimitiveTypeMapper implements SingleColumnMapper {
 	String columnName;
 	Field field;
 	boolean mapObjectToRow;
@@ -17,6 +17,16 @@ public class PrimitiveTypeMapper implements Mapper {
 		this.columnName = columnName;
 		this.field = field;
 		this.mapObjectToRow = mapObjectToRow;
+	}
+
+	@Override
+	public String getColumnName() {
+		return columnName;
+	}
+
+	@Override
+	public Field getField() {
+		return field;
 	}
 
 	@Override
@@ -69,6 +79,11 @@ public class PrimitiveTypeMapper implements Mapper {
 		}
 		Object value = ReflectionUtils.getFieldValue(field, obj);
 		row.put(columnName, value);
+	}
+
+	@Override
+	public Object mapFieldValueToDatabasePrimitiveValue(Object fieldValue) {
+		return fieldValue;
 	}
 
 	public String toString() {

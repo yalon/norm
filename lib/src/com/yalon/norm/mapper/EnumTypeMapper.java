@@ -10,7 +10,7 @@ import com.yalon.norm.NormException;
 import com.yalon.norm.utils.ReflectionUtils;
 import com.yalon.norm.utils.StringUtils;
 
-public class EnumTypeMapper implements Mapper {
+public class EnumTypeMapper implements SingleColumnMapper {
 	String columnName;
 	Field field;
 	Object[] values;
@@ -29,6 +29,16 @@ public class EnumTypeMapper implements Mapper {
 	}
 
 	@Override
+	public String getColumnName() {
+		return columnName;
+	}
+
+	@Override
+	public Field getField() {
+		return field;
+	}
+
+	@Override
 	public void mapRowToObject(DataRow row, Object obj) {
 		int columnIndex = row.getColumnIndex(columnName);
 		int enumIndex = row.getInt(columnIndex);
@@ -40,13 +50,18 @@ public class EnumTypeMapper implements Mapper {
 		if (!mapObjectToRow) {
 			return;
 		}
+
+		row.put(columnName, mapFieldValueToDatabasePrimitiveValue(obj));
+	}
+
+	@Override
+	public Object mapFieldValueToDatabasePrimitiveValue(Object value) {
 		for (int i = 0; i < values.length; ++i) {
-			if (values[i].equals(obj)) {
-				row.put(columnName, i);
-				return;
+			if (values[i].equals(value)) {
+				return i;
 			}
 		}
-		throw new NormException("cannot find enum value index for enum " + obj);
+		throw new NormException("cannot find enum value index for enum " + value);
 	}
 
 	public String toString() {
