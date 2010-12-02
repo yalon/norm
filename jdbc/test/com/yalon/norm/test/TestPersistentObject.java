@@ -9,6 +9,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.SimpleLayout;
 
+import com.yalon.norm.Cursor;
 import com.yalon.norm.Database;
 import com.yalon.norm.adapter.jdbc.SqliteJDBCDatabase;
 import com.yalon.norm.annotations.Column;
@@ -49,6 +50,7 @@ public class TestPersistentObject extends TestCase {
 	}
 	
 	public void testInsert() {
+		DatabaseConnection.get().beginTransaction();
 		Foo foo = new Foo();
 		foo.col1 = 42;
 		foo.col2 = "this is a test";
@@ -62,6 +64,19 @@ public class TestPersistentObject extends TestCase {
 		foo2.save();
 		assertEquals(new Long(2), foo2.getId());
 		assertFalse(foo2.equals(foo));
+		DatabaseConnection.get().setTransactionSuccessful();
+		DatabaseConnection.get().endTransaction();
+		
+		Cursor cur = DatabaseConnection.get().execQuerySQL("SELECT * FROM foos");
+		assertTrue(cur.moveToNext());
+		assertEquals(1, cur.getLong(cur.getColumnIndex("id")));
+		assertEquals(42, cur.getLong(cur.getColumnIndex("col1")));
+		assertEquals("this is a test", cur.getString(cur.getColumnIndex("col2")));
+		
+		assertTrue(cur.moveToNext());
+		assertEquals(2, cur.getLong(cur.getColumnIndex("id")));
+		assertEquals(424, cur.getLong(cur.getColumnIndex("col1")));
+		assertEquals("this is a test2", cur.getString(cur.getColumnIndex("col2")));
 	}
 	
 	public void testUpdate() {
@@ -77,5 +92,9 @@ public class TestPersistentObject extends TestCase {
 		foo.col1 = 84;
 		foo.save();
 		DatabaseConnection.get().endTransaction();	
+	}
+	
+	public void testDestroy() {
+		
 	}
 }
