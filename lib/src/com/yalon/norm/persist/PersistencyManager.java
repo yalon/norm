@@ -95,7 +95,8 @@ public class PersistencyManager {
 			sep = ", ";
 		}
 		sql.append(")");
-		LOG.debug("insert entity={} sql={}", obj.getClass(), sql.toString());
+		LOG.debug("insert entity={} sql={} values={}",
+				new Object[] { obj.getClass(), sql.toString(), values });
 		Statement stmt = db.compileStatement(sql.toString());
 		try {
 			for (int i = 0; i < values.length; ++i) {
@@ -134,7 +135,11 @@ public class PersistencyManager {
 		LOG.debug("findById entity={} id={}, sql={}", new Object[] { entity, id, sql });
 		Cursor cur = db.execQuerySQL(sql.toString(), new String[] { id.toString() });
 		try {
-			return map.<T> mapRowToNewObject(cur);
+			if (cur.moveToNext()) {
+				return map.<T> mapRowToNewObject(cur);
+			} else {
+				return null;
+			}
 		} finally {
 			cur.close();
 		}
@@ -188,9 +193,11 @@ public class PersistencyManager {
 					}
 					String fieldName = str.substring(matchIndex + 1, lastMatchEndPos);
 					String column = map.getColumnForField(fieldName);
-					result[argIndex] = primitiveTypeToString(map.mapFieldValueToColumnTypeValue(
-							fieldName, bindArgs[argIndex]));
-					argIndex++;
+					if (argIndex < result.length) {
+						result[argIndex] = primitiveTypeToString(map
+								.mapFieldValueToColumnTypeValue(fieldName, bindArgs[argIndex]));
+						argIndex++;
+					}
 					sql.append(column);
 				} else {
 					// This is an escaped '$'.

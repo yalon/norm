@@ -54,7 +54,7 @@ public class AndroidStatement extends StatementBase {
 	@Override
 	public void bindNull(int index) {
 		try {
-			this.statement.bindNull(index);
+			this.statement.bindNull(index + 1);
 		} catch (SQLException e) {
 			throw this.exceptionConverter.convert(e);
 		}
@@ -78,7 +78,7 @@ public class AndroidStatement extends StatementBase {
 	@Override
 	public void bindInt(int index, int value) {
 		try {
-			this.statement.bindLong(index, value);
+			this.statement.bindLong(index + 1, value);
 		} catch (SQLException e) {
 			throw this.exceptionConverter.convert(e);
 		}
@@ -87,7 +87,7 @@ public class AndroidStatement extends StatementBase {
 	@Override
 	public void bindLong(int index, long value) {
 		try {
-			this.statement.bindLong(index, value);
+			this.statement.bindLong(index + 1, value);
 		} catch (SQLException e) {
 			throw this.exceptionConverter.convert(e);
 		}
@@ -101,7 +101,7 @@ public class AndroidStatement extends StatementBase {
 	@Override
 	public void bindDouble(int index, double value) {
 		try {
-			this.statement.bindDouble(index, value);
+			this.statement.bindDouble(index + 1, value);
 		} catch (SQLException e) {
 			throw this.exceptionConverter.convert(e);
 		}
@@ -110,7 +110,7 @@ public class AndroidStatement extends StatementBase {
 	@Override
 	public void bindString(int index, String value) {
 		try {
-			this.statement.bindString(index, value);
+			this.statement.bindString(index + 1, value);
 		} catch (SQLException e) {
 			throw this.exceptionConverter.convert(e);
 		}
@@ -119,7 +119,7 @@ public class AndroidStatement extends StatementBase {
 	@Override
 	public void bindBlob(int index, byte[] value) {
 		try {
-			this.statement.bindBlob(index, value);
+			this.statement.bindBlob(index + 1, value);
 		} catch (SQLException e) {
 			throw this.exceptionConverter.convert(e);
 		}

@@ -7,6 +7,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.yalon.norm.DataRow;
 import com.yalon.norm.NormSQLException;
 import com.yalon.norm.annotations.Column;
@@ -16,6 +19,7 @@ import com.yalon.norm.utils.ReflectionUtils;
 import com.yalon.norm.utils.StringUtils;
 
 public class EntityMapper {
+	public static final Logger LOG = LoggerFactory.getLogger(EntityMapper.class);
 	public static final String DEFAULT_POLYMORPHIC_COLUMN = "type";
 
 	protected EntityMapper parent;
@@ -114,6 +118,11 @@ public class EntityMapper {
 				}
 			}
 		}
+
+		if (parent != null) {
+			return parent.findSingleColumnMapper(fieldName);
+		}
+
 		throw new NormSQLException("field " + fieldName
 				+ " doesn't map into a single (or any) column");
 	}
@@ -219,8 +228,8 @@ public class EntityMapper {
 				curParent.columns.addAll(columns);
 				curParent = curParent.parent;
 			}
-		}		
-		
+		}
+
 		columns.addAll(parentColumns);
 	}
 

@@ -91,6 +91,26 @@ public class ReflectionUtils {
 		}
 	}
 
+	public static Method findMethod(String methodName, Class<?> clazz, Class<?>... paramTypes) {
+		Class<?> iter = clazz;
+
+		while (iter != null) {
+			try {
+				return iter.getMethod(methodName, paramTypes);
+			} catch (SecurityException e) {
+			} catch (NoSuchMethodException e) {
+			}
+
+			try {
+				return iter.getDeclaredMethod(methodName, paramTypes);
+			} catch (SecurityException e) {
+			} catch (NoSuchMethodException e) {
+			}
+			iter = iter.getSuperclass();
+		}
+		throw new NormException("cannot find method " + methodName + " for " + clazz);
+	}
+
 	public static Method getMethod(String methodName, Object obj) {
 		try {
 			return obj.getClass().getMethod(methodName);

@@ -5,6 +5,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.yalon.norm.DataRow;
 import com.yalon.norm.NormException;
 import com.yalon.norm.NormSQLException;
@@ -12,6 +15,8 @@ import com.yalon.norm.annotations.Entity;
 import com.yalon.norm.utils.ReflectionUtils;
 
 public class EntityMap {
+	protected static final Logger LOG = LoggerFactory.getLogger(EntityMap.class);
+
 	protected Map<Class<?>, EntityMapper> classToEntityMapper;
 
 	public EntityMap() {
@@ -43,15 +48,14 @@ public class EntityMap {
 			}
 
 			EntityMapper parentMapper = null;
-			for (Class<?> c : classes) {
-				if (c.isAnnotationPresent(Entity.class)) {
-					EntityMapper mapper = classToEntityMapper.get(c);
-					if (mapper == null) {
-						parentMapper = new EntityMapper(parentMapper, c);
-						classToEntityMapper.put(c, parentMapper);
-					} else {
-						parentMapper = mapper;
-					}
+			while (!classes.isEmpty()) {
+				Class<?> c = classes.pop();
+				EntityMapper mapper = classToEntityMapper.get(c);
+				if (mapper != null) {
+					parentMapper = mapper;
+				} else if (c.isAnnotationPresent(Entity.class)) {
+					parentMapper = new EntityMapper(parentMapper, c);
+					classToEntityMapper.put(c, parentMapper);
 				}
 			}
 
@@ -61,6 +65,7 @@ public class EntityMap {
 
 			EntityMapper mapper = new EntityMapper(parentMapper, clazz);
 			classToEntityMapper.put(clazz, mapper);
+			LOG.debug("new mapper class={} mapper={}", clazz, mapper);
 		}
 	}
 
