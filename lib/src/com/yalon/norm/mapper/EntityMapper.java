@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.yalon.norm.DataRow;
+import com.yalon.norm.NormException;
 import com.yalon.norm.NormSQLException;
 import com.yalon.norm.annotations.Column;
 import com.yalon.norm.annotations.Entity;
@@ -249,6 +250,10 @@ public class EntityMapper {
 				mappers.add(new EnumTypeMapper(columnName, f, !col.dbToObjectOnly()));
 			} else if (ReflectionUtils.isDatabasePrimitiveType(f.getType())) {
 				mappers.add(new PrimitiveTypeMapper(columnName, f, !col.dbToObjectOnly()));
+			} else if (ReflectionUtils.isPrimitiveArrayType(f.getType())) {
+				mappers.add(new PrimitiveArrayTypeMapper(columnName, f, !col.dbToObjectOnly()));
+			} else {
+				throw new NormException("don't know how to map field " + f);
 			}
 			// TODO: allow custom mapping here, arrays of stuff, etc.
 

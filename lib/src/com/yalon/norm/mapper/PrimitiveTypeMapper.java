@@ -1,32 +1,15 @@
 package com.yalon.norm.mapper;
 
 import java.lang.reflect.Field;
-import java.util.Map;
 
 import com.yalon.norm.DataRow;
 import com.yalon.norm.NormException;
 import com.yalon.norm.NormSQLException;
 import com.yalon.norm.utils.ReflectionUtils;
 
-public class PrimitiveTypeMapper implements SingleColumnMapper {
-	String columnName;
-	Field field;
-	boolean mapObjectToRow;
-
+public class PrimitiveTypeMapper extends SingleColumnMapperBase {
 	public PrimitiveTypeMapper(String columnName, Field field, boolean mapObjectToRow) {
-		this.columnName = columnName;
-		this.field = field;
-		this.mapObjectToRow = mapObjectToRow;
-	}
-
-	@Override
-	public String getColumnName() {
-		return columnName;
-	}
-
-	@Override
-	public Field getField() {
-		return field;
+		super(columnName, field, mapObjectToRow);
 	}
 
 	@Override
@@ -70,15 +53,6 @@ public class PrimitiveTypeMapper implements SingleColumnMapper {
 		}
 
 		ReflectionUtils.setFieldValue(field, obj, value);
-	}
-
-	@Override
-	public void mapObjectToRow(Object obj, Map<String, Object> row) {
-		if (!mapObjectToRow) {
-			return;
-		}
-		Object value = ReflectionUtils.getFieldValue(field, obj);
-		row.put(columnName, value);
 	}
 
 	@Override

@@ -14,20 +14,13 @@ import com.yalon.norm.persist.PersistencyManager;
 import com.yalon.norm.utils.ReflectionUtils;
 import com.yalon.norm.utils.StringUtils;
 
-public class EnumTypeMapper implements SingleColumnMapper {
+public class EnumTypeMapper extends SingleColumnMapperBase {
 	protected static final Logger LOG = LoggerFactory.getLogger(PersistencyManager.class);
 
-	String columnName;
-	Field field;
 	Object[] values;
-	boolean mapObjectToRow;
 
 	public EnumTypeMapper(String columnName, Field field, boolean mapObjectToRow) {
-		LOG.debug("EnumTypeMapper columnName={} field={}", columnName, field);
-		this.columnName = columnName;
-		this.field = field;
-		this.mapObjectToRow = mapObjectToRow;
-		LOG.debug("EnumTypeMapper type methods={}", field.getType().getDeclaredMethods());
+		super(columnName, field, mapObjectToRow);
 		Method enumValuesMethod = ReflectionUtils.findMethod("values", field.getType());
 		Object arr = ReflectionUtils.callMethod(enumValuesMethod, field.getType());
 		values = new Object[Array.getLength(arr)];
@@ -37,30 +30,10 @@ public class EnumTypeMapper implements SingleColumnMapper {
 	}
 
 	@Override
-	public String getColumnName() {
-		return columnName;
-	}
-
-	@Override
-	public Field getField() {
-		return field;
-	}
-
-	@Override
 	public void mapRowToObject(DataRow row, Object obj) {
 		int columnIndex = row.getColumnIndex(columnName);
 		int enumIndex = row.getInt(columnIndex);
 		ReflectionUtils.setFieldValue(field, obj, values[enumIndex]);
-	}
-
-	@Override
-	public void mapObjectToRow(Object obj, Map<String, Object> row) {
-		if (!mapObjectToRow) {
-			return;
-		}
-
-		row.put(columnName,
-				mapFieldValueToDatabasePrimitiveValue(ReflectionUtils.getFieldValue(field, obj)));
 	}
 
 	@Override
