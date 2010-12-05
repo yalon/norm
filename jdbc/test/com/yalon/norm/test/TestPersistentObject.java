@@ -1,6 +1,7 @@
 package com.yalon.norm.test;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.List;
 
 import junit.framework.TestCase;
@@ -27,6 +28,12 @@ public class TestPersistentObject extends TestCase {
 
 		@Column
 		String col2;
+
+		@Column
+		long[] longArray;
+		
+		@Column
+		boolean[] boolArray;
 	}
 
 	public TestPersistentObject(String name) {
@@ -42,7 +49,8 @@ public class TestPersistentObject extends TestCase {
 		Database db = new SqliteJDBCDatabase("unittest.db");
 		DatabaseConnection.open(db);
 
-		db.execSQL("CREATE TABLE foos (id INTEGER PRIMARY KEY AUTOINCREMENT, col1 INTEGER, col2 TEXT)");
+		db.execSQL("CREATE TABLE foos (id INTEGER PRIMARY KEY AUTOINCREMENT" + 
+				", col1 INTEGER, col2 TEXT, long_array TEXT, bool_array TEXT)");
 		PersistencyManager.register(Foo.class);
 	}
 
@@ -63,6 +71,8 @@ public class TestPersistentObject extends TestCase {
 		Foo foo2 = new Foo();
 		foo2.col1 = 424;
 		foo2.col2 = "this is a test2";
+		foo2.longArray = new long[] { 1, 2, 3 };
+		foo2.boolArray = new boolean[] { true, false, true };
 		foo2.save();
 		assertEquals(new Long(2), foo2.getId());
 		assertFalse(foo2.equals(foo));
@@ -79,6 +89,8 @@ public class TestPersistentObject extends TestCase {
 		assertEquals(2, cur.getLong(cur.getColumnIndex("id")));
 		assertEquals(424, cur.getLong(cur.getColumnIndex("col1")));
 		assertEquals("this is a test2", cur.getString(cur.getColumnIndex("col2")));
+		assertEquals("3,1,2,3", cur.getString(cur.getColumnIndex("long_array")));
+		assertEquals("3,true,false,true", cur.getString(cur.getColumnIndex("bool_array")));
 	}
 
 	public void testUpdate() {
@@ -115,27 +127,31 @@ public class TestPersistentObject extends TestCase {
 		cur = DatabaseConnection.get().execQuerySQL("SELECT * FROM foos WHERE id=1");
 		assertFalse(cur.moveToNext());
 	}
-	
+
 	public void testFindById() {
 		Foo foo = new Foo();
 		foo.col1 = 42;
 		foo.col2 = "this is a test";
+		foo.longArray = new long[] { 3, 1, 4, 1, 5 };
+		foo.boolArray = new boolean[] { true, false };
 		foo.save();
 
 		Foo foundFoo = PersistencyManager.findById(Foo.class, 1);
 		assertEquals(foo, foundFoo);
+		assertTrue(Arrays.equals(foo.longArray, foundFoo.longArray));
+		assertTrue(Arrays.equals(foo.boolArray, foundFoo.boolArray));
 	}
-	
+
 	public void testFindAll() {
 		Foo foo = new Foo();
 		foo.col1 = 42;
 		foo.col2 = "this is a test";
 		foo.save();
-		
+
 		List<Foo> result = PersistencyManager.findAll(Foo.class, "$col1 = ?", 42);
 		assertEquals(1, result.size());
 		assertEquals(foo, result.get(0));
-		
+
 		result = PersistencyManager.findAll(Foo.class, "$col1 < ? AND $col2 LIKE ?", 54, "%is a%");
 		assertEquals(1, result.size());
 		assertEquals(foo, result.get(0));

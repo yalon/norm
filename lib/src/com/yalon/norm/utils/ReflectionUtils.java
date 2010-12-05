@@ -139,6 +139,33 @@ public class ReflectionUtils {
 		}
 	}
 
+	public static Class<?> primitiveToWrapper(Class<?> primitive) {
+		if (primitive == boolean.class) {
+			return Boolean.class;
+		} else if (primitive == byte.class) {
+			return Byte.class;
+		} else if (primitive == short.class) {
+			return Short.class;
+		} else if (primitive == int.class) {
+			return Integer.class;
+		} else if (primitive == long.class) {
+			return Long.class;
+		} else if (primitive == float.class) {
+			return Float.class;
+		} else if (primitive == double.class) {
+			return Double.class;
+		} else if (primitive == char.class) {
+			return Character.class;
+		} else if (primitive == String.class) {
+			return String.class;
+		}
+		throw new NormException("class " + primitive + " is not a Java primitive class");
+	}
+
+	public static boolean isPrimitiveArrayType(Class<?> clazz) {
+		return clazz.isArray() && clazz.getComponentType().isPrimitive();
+	}
+
 	public static boolean isDatabasePrimitiveType(Class<?> clazz) {
 		return clazz.isPrimitive() || clazz == Boolean.class || clazz == Short.class
 				|| clazz == Integer.class || clazz == Long.class || clazz == Float.class

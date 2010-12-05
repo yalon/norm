@@ -11,6 +11,9 @@ public class TestEntityMapper extends TestCase {
 	static class Foo {
 		@Column
 		protected int col1;
+		
+		@Column
+		protected long[] longArray;
 	}
 
 	@Entity
