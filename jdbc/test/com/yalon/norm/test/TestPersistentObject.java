@@ -31,9 +31,19 @@ public class TestPersistentObject extends TestCase {
 
 		@Column
 		long[] longArray;
-		
+
 		@Column
 		boolean[] boolArray;
+	}
+
+	@Entity
+	static class Bar extends PersistentObject {
+		static enum State {
+			A, B, C, D
+		};
+
+		@Column
+		State state;
 	}
 
 	public TestPersistentObject(String name) {
@@ -49,9 +59,11 @@ public class TestPersistentObject extends TestCase {
 		Database db = new SqliteJDBCDatabase("unittest.db");
 		DatabaseConnection.open(db);
 
-		db.execSQL("CREATE TABLE foos (id INTEGER PRIMARY KEY AUTOINCREMENT" + 
-				", col1 INTEGER, col2 TEXT, long_array TEXT, bool_array TEXT)");
+		db.execSQL("CREATE TABLE foos (id INTEGER PRIMARY KEY AUTOINCREMENT"
+				+ ", col1 INTEGER, col2 TEXT, long_array TEXT, bool_array TEXT)");
+		db.execSQL("CREATE TABLE bars (id INTEGER PRIMARY KEY AUTOINCREMENT" + ", state INTEGER)");
 		PersistencyManager.register(Foo.class);
+		PersistencyManager.register(Bar.class);
 	}
 
 	@Override
@@ -148,12 +160,32 @@ public class TestPersistentObject extends TestCase {
 		foo.col2 = "this is a test";
 		foo.save();
 
-		List<Foo> result = PersistencyManager.findAll(Foo.class, "$col1 = ?", 42);
+		List<Foo> result = PersistencyManager.findAll(Foo.class, "$col1 = ?")
+				.bindFieldType("col1", 42).execute();
 		assertEquals(1, result.size());
 		assertEquals(foo, result.get(0));
 
-		result = PersistencyManager.findAll(Foo.class, "$col1 < ? AND $col2 LIKE ?", 54, "%is a%");
+		result = PersistencyManager.findAll(Foo.class, "$col1 < ? AND $col2 LIKE ?")
+				.bindFieldType("col1", 54).bind("%is a%").execute();
 		assertEquals(1, result.size());
 		assertEquals(foo, result.get(0));
+	}
+
+	public void testFindAllEnumIn() {
+		Bar bar = new Bar();
+		bar.state = Bar.State.A;
+		bar.save();
+
+		Bar bar2 = new Bar();
+		bar2.state = Bar.State.B;
+		bar2.save();
+
+		Bar bar3 = new Bar();
+		bar3.state = Bar.State.C;
+		bar3.save();
+
+		List<Bar> result = PersistencyManager.findAll(Bar.class, "$state IN (?, ?)")
+				.bindFieldType("state", Bar.State.A).bindFieldType("state", Bar.State.B).execute();
+		assertEquals(2, result.size());
 	}
 }

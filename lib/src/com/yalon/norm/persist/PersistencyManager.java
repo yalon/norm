@@ -1,9 +1,7 @@
 package com.yalon.norm.persist;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map.Entry;
 
 import org.slf4j.Logger;
@@ -11,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 import com.yalon.norm.Cursor;
 import com.yalon.norm.Database;
-import com.yalon.norm.NormSQLException;
 import com.yalon.norm.Statement;
 import com.yalon.norm.mapper.EntityMap;
 import com.yalon.norm.mapper.EntityMapper;
@@ -145,89 +142,16 @@ public class PersistencyManager {
 		}
 	}
 
-	public static <T> List<T> findAll(Class<T> entity, String condition, Object... bindArgs) {
-		Database db = DatabaseConnection.get();
-		EntityMapper map = entityMap.get(entity);
+	public static <T extends Persistable> SelectBuilder<T> findAll(Class<T> entity) {
+		return findAll(entity, "");
+	}
 
-		StringBuilder sql = new StringBuilder("SELECT ");
-		StringUtils.join(map.getColumns().iterator(), ", ", sql);
-		sql.append(" FROM ");
-		sql.append(map.getTableName());
-		String[] strBindArgs = null;
-		if (!StringUtils.isEmpty(condition)) {
-			sql.append(" WHERE ");
-			strBindArgs = mapAttributesToColumnsAndBindArgs(map, condition, bindArgs, sql);
-		}
-		LOG.debug("findById entity={} sql={} bindArgs={}",
-				new Object[] { entity, sql, strBindArgs });
-		Cursor cur = db.execQuerySQL(sql.toString(), strBindArgs);
-		try {
-			ArrayList<T> result = new ArrayList<T>();
-			while (cur.moveToNext()) {
-				result.add(map.<T> mapRowToNewObject(cur));
-			}
-			return result;
-		} finally {
-			cur.close();
-		}
+	public static <T extends Persistable> SelectBuilder<T> findAll(Class<T> entity, String condition) {
+		return new SelectBuilder<T>(entity, condition);
 	}
 
 	public static void register(Class<? extends PersistentObject> entity) {
 		LOG.debug("register entity={}", entity);
 		entityMap.putIfNotExists(entity);
-	}
-
-	protected static String[] mapAttributesToColumnsAndBindArgs(EntityMapper map, String str,
-			Object[] bindArgs, StringBuilder sql) {
-		String[] result = new String[bindArgs.length];
-		int argIndex = 0;
-		int matchIndex = str.indexOf('$');
-		int lastMatchEndPos = 0;
-		while (matchIndex >= 0) {
-			sql.append(str.substring(lastMatchEndPos, matchIndex));
-			if (matchIndex < str.length() - 1) {
-				if (str.charAt(matchIndex + 1) != '$') {
-					// This is an attribute.
-					for (lastMatchEndPos = matchIndex + 1; Character.isJavaIdentifierPart(str
-							.charAt(lastMatchEndPos)) && lastMatchEndPos < str.length(); ++lastMatchEndPos) {
-					}
-					String fieldName = str.substring(matchIndex + 1, lastMatchEndPos);
-					String column = map.getColumnForField(fieldName);
-					if (argIndex < result.length) {
-						result[argIndex] = primitiveTypeToString(map
-								.mapFieldValueToColumnTypeValue(fieldName, bindArgs[argIndex]));
-						argIndex++;
-					}
-					sql.append(column);
-				} else {
-					// This is an escaped '$'.
-					sql.append('$');
-					lastMatchEndPos = matchIndex + 2;
-				}
-			} else {
-				throw new NormSQLException("unescaped $ at the end of the string: " + str);
-			}
-			matchIndex = str.indexOf('$', matchIndex + 1);
-		}
-
-		if (lastMatchEndPos < str.length()) {
-			sql.append(str.substring(lastMatchEndPos, str.length()));
-		}
-
-		for (; argIndex < result.length; ++argIndex) {
-			result[argIndex] = primitiveTypeToString(bindArgs[argIndex]);
-		}
-
-		return result;
-	}
-
-	protected static String primitiveTypeToString(Object value) {
-		if (value == null) {
-			return null;
-		} else if (value instanceof Boolean) {
-			return ((Boolean) value).booleanValue() ? "1" : "0";
-		}
-
-		return value.toString();
 	}
 }
