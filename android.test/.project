@@ -31,4 +31,16 @@
 		<nature>com.android.ide.eclipse.adt.AndroidNature</nature>
 		<nature>org.eclipse.jdt.core.javanature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>norm_android_src</name>
+			<type>2</type>
+			<locationURI>_android_norm_android_208e10ec/src</locationURI>
+		</link>
+		<link>
+			<name>norm_lib_src</name>
+			<type>2</type>
+			<locationURI>_android_norm_lib_5b4a4382/src</locationURI>
+		</link>
+	</linkedResources>
 </projectDescription>
