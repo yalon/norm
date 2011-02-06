@@ -15,7 +15,7 @@ import com.yalon.norm.sqlite.ddl.TableBuilder;
 import com.yalon.norm.sqlite.ddl.TableEditor;
 
 public class TestEntityDAO extends TestCase {
-	@Entity(polymorphic = Entity.Polyphormic.YES)
+	@Entity(polymorphic = Entity.Polymorphic.YES)
 	static class Foo {
 		@Column
 		protected int col1;

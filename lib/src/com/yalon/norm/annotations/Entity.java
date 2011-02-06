@@ -8,12 +8,12 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface Entity {
-	public enum Polyphormic {		
+	public enum Polymorphic {		
 		AUTO,
 		YES,
 		NO
 	}
 	String table() default "";
-	Polyphormic polymorphic() default Polyphormic.AUTO;
+	Polymorphic polymorphic() default Polymorphic.AUTO;
 	String polyColumn() default "";
 }

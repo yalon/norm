@@ -7,7 +7,7 @@ import com.yalon.norm.EntityDAO;
 import com.yalon.norm.annotations.Entity;
 import com.yalon.norm.mapper.EntityMap;
 
-@Entity(polymorphic = Entity.Polyphormic.YES)
+@Entity(polymorphic = Entity.Polymorphic.YES)
 public class Vehicle {
 	enum Color {
 		RED, GREEN, BLUE, BLACK

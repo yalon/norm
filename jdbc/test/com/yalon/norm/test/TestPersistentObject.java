@@ -2,7 +2,6 @@ package com.yalon.norm.test;
 
 import java.io.File;
 import java.util.Arrays;
-import java.util.List;
 
 import junit.framework.TestCase;
 
@@ -17,6 +16,7 @@ import com.yalon.norm.adapter.jdbc.SqliteJDBCDatabase;
 import com.yalon.norm.annotations.Column;
 import com.yalon.norm.annotations.Entity;
 import com.yalon.norm.persist.DatabaseConnection;
+import com.yalon.norm.persist.EntityCursor;
 import com.yalon.norm.persist.PersistencyManager;
 import com.yalon.norm.persist.PersistentObject;
 
@@ -59,9 +59,8 @@ public class TestPersistentObject extends TestCase {
 		Database db = new SqliteJDBCDatabase("unittest.db");
 		DatabaseConnection.open(db);
 
-		db.execSQL("CREATE TABLE foos (id INTEGER PRIMARY KEY AUTOINCREMENT"
-				+ ", col1 INTEGER, col2 TEXT, long_array TEXT, bool_array TEXT)");
-		db.execSQL("CREATE TABLE bars (id INTEGER PRIMARY KEY AUTOINCREMENT" + ", state INTEGER)");
+		db.execSQL("CREATE TABLE foos (col1 INTEGER, col2 TEXT, long_array TEXT, bool_array TEXT)");
+		db.execSQL("CREATE TABLE bars (state INTEGER)");
 		PersistencyManager.register(Foo.class);
 		PersistencyManager.register(Bar.class);
 	}
@@ -91,14 +90,14 @@ public class TestPersistentObject extends TestCase {
 		DatabaseConnection.get().setTransactionSuccessful();
 		DatabaseConnection.get().endTransaction();
 
-		Cursor cur = DatabaseConnection.get().execQuerySQL("SELECT * FROM foos");
+		Cursor cur = DatabaseConnection.get().execQuerySQL("SELECT ROWID, * FROM foos");
 		assertTrue(cur.moveToNext());
-		assertEquals(1, cur.getLong(cur.getColumnIndex("id")));
+		assertEquals(1, cur.getLong(cur.getColumnIndex("ROWID")));
 		assertEquals(42, cur.getLong(cur.getColumnIndex("col1")));
 		assertEquals("this is a test", cur.getString(cur.getColumnIndex("col2")));
 
 		assertTrue(cur.moveToNext());
-		assertEquals(2, cur.getLong(cur.getColumnIndex("id")));
+		assertEquals(2, cur.getLong(cur.getColumnIndex("ROWID")));
 		assertEquals(424, cur.getLong(cur.getColumnIndex("col1")));
 		assertEquals("this is a test2", cur.getString(cur.getColumnIndex("col2")));
 		assertEquals("3,1,2,3", cur.getString(cur.getColumnIndex("long_array")));
@@ -111,18 +110,18 @@ public class TestPersistentObject extends TestCase {
 		foo.col2 = "this is a test";
 		foo.save();
 
-		Cursor cur = DatabaseConnection.get().execQuerySQL("SELECT * FROM foos");
+		Cursor cur = DatabaseConnection.get().execQuerySQL("SELECT ROWID, * FROM foos");
 		assertTrue(cur.moveToNext());
-		assertEquals(1, cur.getLong(cur.getColumnIndex("id")));
+		assertEquals(1, cur.getLong(cur.getColumnIndex("ROWID")));
 		assertEquals(42, cur.getLong(cur.getColumnIndex("col1")));
 		assertEquals("this is a test", cur.getString(cur.getColumnIndex("col2")));
 
 		foo.col1 = 84;
 		foo.save();
 
-		cur = DatabaseConnection.get().execQuerySQL("SELECT * FROM foos");
+		cur = DatabaseConnection.get().execQuerySQL("SELECT ROWID, * FROM foos");
 		assertTrue(cur.moveToNext());
-		assertEquals(1, cur.getLong(cur.getColumnIndex("id")));
+		assertEquals(1, cur.getLong(cur.getColumnIndex("ROWID")));
 		assertEquals(84, cur.getLong(cur.getColumnIndex("col1")));
 	}
 
@@ -132,11 +131,11 @@ public class TestPersistentObject extends TestCase {
 		foo.col2 = "this is a test";
 		foo.save();
 
-		Cursor cur = DatabaseConnection.get().execQuerySQL("SELECT * FROM foos WHERE id=1");
+		Cursor cur = DatabaseConnection.get().execQuerySQL("SELECT ROWID,* FROM foos WHERE rowid=1");
 		assertTrue(cur.moveToNext());
 
 		foo.destroy();
-		cur = DatabaseConnection.get().execQuerySQL("SELECT * FROM foos WHERE id=1");
+		cur = DatabaseConnection.get().execQuerySQL("SELECT * FROM foos WHERE rowid=1");
 		assertFalse(cur.moveToNext());
 	}
 
@@ -160,15 +159,19 @@ public class TestPersistentObject extends TestCase {
 		foo.col2 = "this is a test";
 		foo.save();
 
-		List<Foo> result = PersistencyManager.findAll(Foo.class, "$col1 = ?")
-				.bindFieldType("col1", 42).execute();
-		assertEquals(1, result.size());
-		assertEquals(foo, result.get(0));
+		EntityCursor<Foo> result = PersistencyManager.findAll(Foo.class, "$col1 = ?").bindFieldType("col1", 42)
+				.execute();
+		assertTrue(result.moveToNext());
+		assertEquals(foo, result.getEntity());
+		assertFalse(result.moveToNext());
+		result.close();
 
-		result = PersistencyManager.findAll(Foo.class, "$col1 < ? AND $col2 LIKE ?")
-				.bindFieldType("col1", 54).bind("%is a%").execute();
-		assertEquals(1, result.size());
-		assertEquals(foo, result.get(0));
+		result = PersistencyManager.findAll(Foo.class, "$col1 < ? AND $col2 LIKE ?").bindFieldType("col1", 54)
+				.bind("%is a%").execute();
+		assertTrue(result.moveToNext());
+		assertEquals(foo, result.getEntity());
+		assertFalse(result.moveToNext());
+		result.close();
 	}
 
 	public void testFindAllEnumIn() {
@@ -184,8 +187,11 @@ public class TestPersistentObject extends TestCase {
 		bar3.state = Bar.State.C;
 		bar3.save();
 
-		List<Bar> result = PersistencyManager.findAll(Bar.class, "$state IN (?, ?)")
+		EntityCursor<Bar> result = PersistencyManager.findAll(Bar.class, "$state IN (?, ?)")
 				.bindFieldType("state", Bar.State.A).bindFieldType("state", Bar.State.B).execute();
-		assertEquals(2, result.size());
+		assertTrue(result.moveToNext());
+		assertTrue(result.moveToNext());
+		assertFalse(result.moveToNext());
+		result.close();
 	}
 }

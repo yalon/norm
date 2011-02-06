@@ -26,7 +26,7 @@ public class EntityMapper {
 	protected EntityMapper parent;
 	protected Class<?> clazz;
 	protected String tableName;
-	protected Entity.Polyphormic polymorphic;
+	protected Entity.Polymorphic polymorphic;
 	protected String polymorphicColumn;
 
 	protected Method afterCreateMethod;
@@ -60,14 +60,24 @@ public class EntityMapper {
 		return columns;
 	}
 
+	@SuppressWarnings("unchecked")
 	public <T> T mapRowToNewObject(DataRow row) {
 		// TODO: call hooks (before/after stuff)
-		@SuppressWarnings("unchecked")
-		T obj = ReflectionUtils.newInstance((Class<T>) clazz);
+		Object obj;
+		if (isPolymorphic()) {
+			String className = getPolymorphicInstanceClassName(row);
+			try {
+				obj = ReflectionUtils.newInstance((Class<T>) Class.forName(className));
+			} catch (ClassNotFoundException e) {
+				throw new NormException(e);
+			}
+		} else {
+			obj = ReflectionUtils.newInstance((Class<T>) clazz);
+		}
 
 		mapRowToObject(row, obj);
 
-		return obj;
+		return (T) obj;
 	}
 
 	public void mapObjectToRow(Object obj, Map<String, Object> row) {
@@ -78,7 +88,7 @@ public class EntityMapper {
 	}
 
 	public boolean isPolymorphic() {
-		return polymorphic == Entity.Polyphormic.YES;
+		return polymorphic == Entity.Polymorphic.YES;
 	}
 
 	public String getPolymorphicInstanceClassName(DataRow row) {
@@ -124,8 +134,7 @@ public class EntityMapper {
 			return parent.findSingleColumnMapper(fieldName);
 		}
 
-		throw new NormSQLException("field " + fieldName
-				+ " doesn't map into a single (or any) column");
+		throw new NormSQLException("field " + fieldName + " doesn't map into a single (or any) column");
 	}
 
 	protected void internalMapObjectToRow(Object obj, Map<String, Object> row) {
@@ -165,49 +174,45 @@ public class EntityMapper {
 		polymorphicColumn = e != null ? e.polyColumn() : parent.polymorphicColumn;
 
 		if (parent != null) {
-			if (parent.polymorphic == Entity.Polyphormic.YES) {
+			if (parent.polymorphic == Entity.Polymorphic.YES) {
 				// Make sure the child is a YES or AUTO.
-				if (polymorphic == Entity.Polyphormic.NO) {
-					throw new NormSQLException("class " + clazz
-							+ " defined as non-polyphormic, but anscestor " + parent.clazz + " is.");
+				if (polymorphic == Entity.Polymorphic.NO) {
+					throw new NormSQLException("class " + clazz + " defined as non-polyphormic, but anscestor "
+							+ parent.clazz + " is.");
 				}
-				polymorphic = Entity.Polyphormic.YES;
+				polymorphic = Entity.Polymorphic.YES;
 
 				// Make sure the column is the same.
-				if (!StringUtils.isEmpty(polymorphicColumn)
-						&& !polymorphicColumn.equals(parent.polymorphicColumn)) {
+				if (!StringUtils.isEmpty(polymorphicColumn) && !polymorphicColumn.equals(parent.polymorphicColumn)) {
 					throw new NormSQLException("class " + clazz
-							+ " defined as polyphormic with a different type column ("
-							+ e.polyColumn() + ") than its anscestor (" + parent.polymorphicColumn
-							+ ")");
+							+ " defined as polyphormic with a different type column (" + e.polyColumn()
+							+ ") than its anscestor (" + parent.polymorphicColumn + ")");
 				}
 
 				if (!StringUtils.isEmpty(tableName) && !tableName.equals(parent.tableName)) {
-					throw new NormSQLException("class " + clazz
-							+ " defined as polymorphic with a different table (" + tableName
-							+ ") than its anscetor (" + parent.tableName + ")");
+					throw new NormSQLException("class " + clazz + " defined as polymorphic with a different table ("
+							+ tableName + ") than its anscetor (" + parent.tableName + ")");
 				}
 				polymorphicColumn = parent.polymorphicColumn;
 				tableName = parent.tableName;
 			} else { /* must be Entity.Polyphormic.NO */
-				if (polymorphic == Entity.Polyphormic.YES) {
+				if (polymorphic == Entity.Polymorphic.YES) {
 					if (StringUtils.isEmpty(polymorphicColumn)) {
 						polymorphicColumn = DEFAULT_POLYMORPHIC_COLUMN;
 					}
 				} else {
-					polymorphic = Entity.Polyphormic.NO;
+					polymorphic = Entity.Polymorphic.NO;
 				}
 			}
 		} else {
-			if (polymorphic == Entity.Polyphormic.AUTO) {
-				polymorphic = Entity.Polyphormic.NO;
+			if (polymorphic == Entity.Polymorphic.AUTO) {
+				polymorphic = Entity.Polymorphic.NO;
 			}
 
-			if (polymorphic == Entity.Polyphormic.NO && !StringUtils.isEmpty(polymorphicColumn)) {
-				throw new NormSQLException("class " + clazz
-						+ " is not polymorphic, but still you defined polyColumn");
+			if (polymorphic == Entity.Polymorphic.NO && !StringUtils.isEmpty(polymorphicColumn)) {
+				throw new NormSQLException("class " + clazz + " is not polymorphic, but still you defined polyColumn");
 			}
-			if (polymorphic == Entity.Polyphormic.YES && StringUtils.isEmpty(e.polyColumn())) {
+			if (polymorphic == Entity.Polymorphic.YES && StringUtils.isEmpty(e.polyColumn())) {
 				polymorphicColumn = DEFAULT_POLYMORPHIC_COLUMN;
 			}
 		}
@@ -220,7 +225,7 @@ public class EntityMapper {
 			curParent = curParent.parent;
 		}
 
-		if (polymorphic == Entity.Polyphormic.YES) {
+		if (polymorphic == Entity.Polymorphic.YES) {
 			columns.add(polymorphicColumn);
 
 			// Put all our columns to all of our parents as well.

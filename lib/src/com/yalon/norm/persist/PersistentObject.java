@@ -3,12 +3,13 @@ package com.yalon.norm.persist;
 import com.yalon.norm.NormSQLException;
 import com.yalon.norm.annotations.Column;
 import com.yalon.norm.annotations.Entity;
-import com.yalon.norm.annotations.Entity.Polyphormic;
+import com.yalon.norm.annotations.Entity.Polymorphic;
 import com.yalon.norm.sqlite.ddl.ConflictAlgorithm;
 
-@Entity(polymorphic = Polyphormic.NO)
+@Entity(polymorphic = Polymorphic.NO)
 public class PersistentObject implements Persistable {
-	@Column(dbToObjectOnly = true)
+	// NOTE: the name here is _case-sensitive_, do not change!
+	@Column(dbToObjectOnly = true, name = "rowid")
 	private Long id;
 
 	/* (non-Javadoc)
@@ -39,6 +40,10 @@ public class PersistentObject implements Persistable {
 	@Override
 	public Long getId() {
 		return id;
+	}
+	
+	public void setId(Long id) {
+		this.id = id;
 	}
 
 	public void save() {

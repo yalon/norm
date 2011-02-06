@@ -7,7 +7,7 @@ import com.yalon.norm.annotations.Entity;
 import com.yalon.norm.mapper.EntityMap;
 
 public class TestEntityMapper extends TestCase {
-	@Entity(polymorphic = Entity.Polyphormic.YES)
+	@Entity(polymorphic = Entity.Polymorphic.YES)
 	static class Foo {
 		@Column
 		protected int col1;

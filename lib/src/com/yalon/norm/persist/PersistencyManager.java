@@ -7,13 +7,11 @@ import java.util.Map.Entry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.yalon.norm.Cursor;
 import com.yalon.norm.Database;
 import com.yalon.norm.Statement;
 import com.yalon.norm.mapper.EntityMap;
 import com.yalon.norm.mapper.EntityMapper;
 import com.yalon.norm.sqlite.ddl.ConflictAlgorithm;
-import com.yalon.norm.utils.StringUtils;
 
 public class PersistencyManager {
 	// TODO: although this interface requires static functions so Persistable
@@ -54,7 +52,7 @@ public class PersistencyManager {
 			sep = ", ";
 		}
 
-		sql.append(" WHERE id=?");
+		sql.append(" WHERE rowid=?");
 		LOG.debug("update entity={} sql={}", obj.getClass(), sql.toString());
 
 		values[values.length - 1] = obj.getId();
@@ -111,34 +109,25 @@ public class PersistencyManager {
 
 		StringBuilder sql = new StringBuilder("DELETE FROM ");
 		sql.append(map.getTableName());
-		sql.append(" WHERE id=?");
+		sql.append(" WHERE rowid=?");
 		LOG.debug("destroy entity={} sql={}", obj.getClass(), sql.toString());
 		db.execSQL(sql.toString(), new Object[] { obj.getId() });
 	}
 
-	public static <T> T findById(Class<T> entity, long id) {
+	public static <T extends Persistable> T findById(Class<T> entity, long id) {
 		return findById(entity, (Long) id);
 	}
 
-	public static <T> T findById(Class<T> entity, Long id) {
-		Database db = DatabaseConnection.get();
-		EntityMapper map = entityMap.get(entity);
-
-		StringBuilder sql = new StringBuilder("SELECT ");
-		StringUtils.join(map.getColumns().iterator(), ", ", sql);
-		sql.append(" FROM ");
-		sql.append(map.getTableName());
-		sql.append(" WHERE id=?");
-		LOG.debug("findById entity={} id={}, sql={}", new Object[] { entity, id, sql });
-		Cursor cur = db.execQuerySQL(sql.toString(), new String[] { id.toString() });
+	public static <T extends Persistable> T findById(Class<T> entity, Long id) {
+		EntityCursor<T> cursor = findAll(entity, "rowid=?").bind(id).execute();
 		try {
-			if (cur.moveToNext()) {
-				return map.<T> mapRowToNewObject(cur);
+			if (cursor.moveToNext()) {
+				return cursor.getEntity();
 			} else {
 				return null;
 			}
 		} finally {
-			cur.close();
+			cursor.close();
 		}
 	}
 
@@ -148,6 +137,14 @@ public class PersistencyManager {
 
 	public static <T extends Persistable> SelectBuilder<T> findAll(Class<T> entity, String condition) {
 		return new SelectBuilder<T>(entity, condition);
+	}
+
+	public static <T extends Persistable> SelectCountBuilder<T> countAll(Class<T> entity) {
+		return new SelectCountBuilder<T>(entity, "");
+	}
+
+	public static <T extends Persistable> SelectCountBuilder<T> countAll(Class<T> entity, String condition) {
+		return new SelectCountBuilder<T>(entity, condition);
 	}
 
 	public static void register(Class<? extends PersistentObject> entity) {
