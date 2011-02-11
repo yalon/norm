@@ -1,14 +1,20 @@
 package com.yalon.norm.adapter.android;
 
+import android.content.ContentResolver;
+import android.database.CharArrayBuffer;
+import android.database.ContentObserver;
+import android.database.DataSetObserver;
 import android.database.SQLException;
+import android.net.Uri;
+import android.os.Bundle;
 
 import com.yalon.norm.Cursor;
 
-public class AndroidCursor implements Cursor {
+public class AndroidCursor implements Cursor, android.database.Cursor {
 	android.database.Cursor cursor;
 	AndroidSQLExceptionConverter exceptionConverter;
 
-	AndroidCursor(android.database.Cursor cursor, AndroidSQLExceptionConverter exceptionConverter) {
+	public AndroidCursor(android.database.Cursor cursor, AndroidSQLExceptionConverter exceptionConverter) {
 		this.cursor = cursor;
 		this.exceptionConverter = exceptionConverter;
 	}
@@ -299,5 +305,55 @@ public class AndroidCursor implements Cursor {
 		} catch (SQLException e) {
 			throw exceptionConverter.convert(e);
 		}
+	}
+
+	@Override
+	public Object getPlatformCursor() {
+		return cursor;
+	}
+
+	@Override
+	public void copyStringToBuffer(int columnIndex, CharArrayBuffer buffer) {
+		cursor.copyStringToBuffer(columnIndex, buffer);
+	}
+
+	@Override
+	public void registerContentObserver(ContentObserver observer) {
+		cursor.registerContentObserver(observer);
+	}
+
+	@Override
+	public void unregisterContentObserver(ContentObserver observer) {
+		cursor.unregisterContentObserver(observer);
+	}
+
+	@Override
+	public void registerDataSetObserver(DataSetObserver observer) {
+		cursor.registerDataSetObserver(observer);
+	}
+
+	@Override
+	public void unregisterDataSetObserver(DataSetObserver observer) {
+		cursor.unregisterDataSetObserver(observer);
+	}
+
+	@Override
+	public void setNotificationUri(ContentResolver cr, Uri uri) {
+		cursor.setNotificationUri(cr, uri);
+	}
+
+	@Override
+	public boolean getWantsAllOnMoveCalls() {
+		return cursor.getWantsAllOnMoveCalls();
+	}
+
+	@Override
+	public Bundle getExtras() {
+		return cursor.getExtras();
+	}
+
+	@Override
+	public Bundle respond(Bundle extras) {
+		return cursor.respond(extras);
 	}
 }

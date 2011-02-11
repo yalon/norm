@@ -31,7 +31,12 @@ public class EntityCursor<T> implements Cursor {
 		LOG.debug("getEntity pos={}", pos);
 		T cachedEntity = cache.get(pos);
 		if (cachedEntity == null) {
-			cachedEntity = entityMapper.mapRowToNewObject(this);
+			if (entityMapper.isPolymorphic()) {
+				Class<?> clazz = entityMapper.getPolymorphicInstanceClass(this);
+				cachedEntity = PersistencyManager.entityMap.get(clazz).mapRowToNewObject(this);
+			} else {
+				cachedEntity = entityMapper.mapRowToNewObject(this);
+			}
 			cache.put(pos, cachedEntity);
 			if (cache.size() > CACHE_SIZE) {
 				Iterator<Integer> iter = cache.keySet().iterator();
@@ -219,5 +224,10 @@ public class EntityCursor<T> implements Cursor {
 	@Override
 	public boolean isNull(int columnIndex) {
 		return cursor.isNull(columnIndex);
+	}
+
+	@Override
+	public Object getPlatformCursor() {
+		return cursor.getPlatformCursor();
 	}
 }

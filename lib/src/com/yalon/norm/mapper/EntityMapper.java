@@ -63,17 +63,7 @@ public class EntityMapper {
 	@SuppressWarnings("unchecked")
 	public <T> T mapRowToNewObject(DataRow row) {
 		// TODO: call hooks (before/after stuff)
-		Object obj;
-		if (isPolymorphic()) {
-			String className = getPolymorphicInstanceClassName(row);
-			try {
-				obj = ReflectionUtils.newInstance((Class<T>) Class.forName(className));
-			} catch (ClassNotFoundException e) {
-				throw new NormException(e);
-			}
-		} else {
-			obj = ReflectionUtils.newInstance((Class<T>) clazz);
-		}
+		Object obj = ReflectionUtils.newInstance((Class<T>) clazz);
 
 		mapRowToObject(row, obj);
 
@@ -97,6 +87,11 @@ public class EntityMapper {
 		}
 
 		return null;
+	}
+	
+	public Class<?> getPolymorphicInstanceClass(DataRow row) {
+		String className = getPolymorphicInstanceClassName(row);
+		return ReflectionUtils.classForName(className);
 	}
 
 	protected void mapRowToObject(DataRow row, Object obj) {

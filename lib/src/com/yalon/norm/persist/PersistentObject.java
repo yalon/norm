@@ -1,10 +1,8 @@
 package com.yalon.norm.persist;
 
-import com.yalon.norm.NormSQLException;
 import com.yalon.norm.annotations.Column;
 import com.yalon.norm.annotations.Entity;
 import com.yalon.norm.annotations.Entity.Polymorphic;
-import com.yalon.norm.sqlite.ddl.ConflictAlgorithm;
 
 @Entity(polymorphic = Polymorphic.NO)
 public class PersistentObject implements Persistable {
@@ -44,25 +42,5 @@ public class PersistentObject implements Persistable {
 	
 	public void setId(Long id) {
 		this.id = id;
-	}
-
-	public void save() {
-		save(null);
-	}
-
-	public void save(ConflictAlgorithm conflictResolution) {
-		if (hasId()) {
-			PersistencyManager.update(this, conflictResolution);
-		} else {
-			this.id = PersistencyManager.insert(this, conflictResolution);
-		}
-	}
-
-	public void destroy() {
-		if (!hasId()) {
-			// TODO: exceptions.
-			throw new NormSQLException("object " + this + " does not have an ID.");
-		}
-		PersistencyManager.destroy(this);
 	}
 }

@@ -17,6 +17,7 @@ import com.yalon.norm.annotations.Column;
 import com.yalon.norm.annotations.Entity;
 import com.yalon.norm.persist.DatabaseConnection;
 import com.yalon.norm.persist.EntityCursor;
+import com.yalon.norm.persist.NormPersistencyManager;
 import com.yalon.norm.persist.PersistencyManager;
 import com.yalon.norm.persist.PersistentObject;
 
@@ -72,10 +73,11 @@ public class TestPersistentObject extends TestCase {
 
 	public void testInsert() {
 		DatabaseConnection.get().beginTransaction();
+		NormPersistencyManager persistencyManager = new NormPersistencyManager(DatabaseConnection.get());
 		Foo foo = new Foo();
 		foo.col1 = 42;
 		foo.col2 = "this is a test";
-		foo.save();
+		persistencyManager.save(foo);
 		assertTrue(foo.hasId());
 		assertEquals(new Long(1), foo.getId());
 
@@ -84,7 +86,7 @@ public class TestPersistentObject extends TestCase {
 		foo2.col2 = "this is a test2";
 		foo2.longArray = new long[] { 1, 2, 3 };
 		foo2.boolArray = new boolean[] { true, false, true };
-		foo2.save();
+		persistencyManager.save(foo2);
 		assertEquals(new Long(2), foo2.getId());
 		assertFalse(foo2.equals(foo));
 		DatabaseConnection.get().setTransactionSuccessful();
@@ -105,10 +107,11 @@ public class TestPersistentObject extends TestCase {
 	}
 
 	public void testUpdate() {
+		NormPersistencyManager persistencyManager = new NormPersistencyManager(DatabaseConnection.get());
 		Foo foo = new Foo();
 		foo.col1 = 42;
 		foo.col2 = "this is a test";
-		foo.save();
+		persistencyManager.save(foo);
 
 		Cursor cur = DatabaseConnection.get().execQuerySQL("SELECT ROWID, * FROM foos");
 		assertTrue(cur.moveToNext());
@@ -117,7 +120,7 @@ public class TestPersistentObject extends TestCase {
 		assertEquals("this is a test", cur.getString(cur.getColumnIndex("col2")));
 
 		foo.col1 = 84;
-		foo.save();
+		persistencyManager.save(foo);
 
 		cur = DatabaseConnection.get().execQuerySQL("SELECT ROWID, * FROM foos");
 		assertTrue(cur.moveToNext());
@@ -126,48 +129,53 @@ public class TestPersistentObject extends TestCase {
 	}
 
 	public void testDestroy() {
+		NormPersistencyManager persistencyManager = new NormPersistencyManager(DatabaseConnection.get());
 		Foo foo = new Foo();
 		foo.col1 = 42;
 		foo.col2 = "this is a test";
-		foo.save();
+		persistencyManager.save(foo);
 
 		Cursor cur = DatabaseConnection.get().execQuerySQL("SELECT ROWID,* FROM foos WHERE rowid=1");
 		assertTrue(cur.moveToNext());
 
-		foo.destroy();
+		persistencyManager.destroy(foo);
 		cur = DatabaseConnection.get().execQuerySQL("SELECT * FROM foos WHERE rowid=1");
 		assertFalse(cur.moveToNext());
 	}
 
 	public void testFindById() {
+		NormPersistencyManager persistencyManager = new NormPersistencyManager(DatabaseConnection.get());
 		Foo foo = new Foo();
 		foo.col1 = 42;
 		foo.col2 = "this is a test";
 		foo.longArray = new long[] { 3, 1, 4, 1, 5 };
 		foo.boolArray = new boolean[] { true, false };
-		foo.save();
+		persistencyManager.save(foo);
 
-		Foo foundFoo = PersistencyManager.findById(Foo.class, 1);
+		Foo foundFoo = persistencyManager.findById(Foo.class, 1);
 		assertEquals(foo, foundFoo);
 		assertTrue(Arrays.equals(foo.longArray, foundFoo.longArray));
 		assertTrue(Arrays.equals(foo.boolArray, foundFoo.boolArray));
 	}
 
 	public void testFindAll() {
+		NormPersistencyManager persistencyManager = new NormPersistencyManager(DatabaseConnection.get());
 		Foo foo = new Foo();
 		foo.col1 = 42;
 		foo.col2 = "this is a test";
-		foo.save();
+		persistencyManager.save(foo);
 
-		EntityCursor<Foo> result = PersistencyManager.findAll(Foo.class, "$col1 = ?").bindFieldType("col1", 42)
-				.execute();
+		Cursor cursor = persistencyManager.findAll(Foo.class, "$col1 = ?").bindFieldType("col1", 42).execute();
+
+		EntityCursor<Foo> result = new EntityCursor<Foo>(Foo.class, cursor);
 		assertTrue(result.moveToNext());
 		assertEquals(foo, result.getEntity());
 		assertFalse(result.moveToNext());
 		result.close();
 
-		result = PersistencyManager.findAll(Foo.class, "$col1 < ? AND $col2 LIKE ?").bindFieldType("col1", 54)
+		cursor = persistencyManager.findAll(Foo.class, "$col1 < ? AND $col2 LIKE ?").bindFieldType("col1", 54)
 				.bind("%is a%").execute();
+		result = new EntityCursor<Foo>(Foo.class, cursor);
 		assertTrue(result.moveToNext());
 		assertEquals(foo, result.getEntity());
 		assertFalse(result.moveToNext());
@@ -175,20 +183,23 @@ public class TestPersistentObject extends TestCase {
 	}
 
 	public void testFindAllEnumIn() {
+		NormPersistencyManager persistencyManager = new NormPersistencyManager(DatabaseConnection.get());
+
 		Bar bar = new Bar();
 		bar.state = Bar.State.A;
-		bar.save();
+		persistencyManager.save(bar);
 
 		Bar bar2 = new Bar();
 		bar2.state = Bar.State.B;
-		bar2.save();
+		persistencyManager.save(bar2);
 
 		Bar bar3 = new Bar();
 		bar3.state = Bar.State.C;
-		bar3.save();
+		persistencyManager.save(bar3);
 
-		EntityCursor<Bar> result = PersistencyManager.findAll(Bar.class, "$state IN (?, ?)")
-				.bindFieldType("state", Bar.State.A).bindFieldType("state", Bar.State.B).execute();
+		Cursor cursor = persistencyManager.findAll(Bar.class, "$state IN (?, ?)").bindFieldType("state", Bar.State.A)
+				.bindFieldType("state", Bar.State.B).execute();
+		EntityCursor<Bar> result = new EntityCursor<Bar>(Bar.class, cursor);
 		assertTrue(result.moveToNext());
 		assertTrue(result.moveToNext());
 		assertFalse(result.moveToNext());

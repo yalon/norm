@@ -315,4 +315,9 @@ public class JDBCCursor implements Cursor {
 			throw new NormSQLException(e);
 		}
 	}
+
+	@Override
+	public Object getPlatformCursor() {
+		return resultSet;
+	}
 }

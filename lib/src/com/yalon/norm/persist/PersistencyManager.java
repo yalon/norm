@@ -7,13 +7,16 @@ import java.util.Map.Entry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.yalon.norm.Cursor;
+import com.yalon.norm.DataRow;
 import com.yalon.norm.Database;
+import com.yalon.norm.NormSQLException;
 import com.yalon.norm.Statement;
 import com.yalon.norm.mapper.EntityMap;
 import com.yalon.norm.mapper.EntityMapper;
 import com.yalon.norm.sqlite.ddl.ConflictAlgorithm;
 
-public class PersistencyManager {
+public class PersistencyManager<CursorClass extends Cursor> {
 	// TODO: although this interface requires static functions so Persistable
 	// can call them, we can
 	// create it as an instance so it can be extended if needed.
@@ -21,9 +24,26 @@ public class PersistencyManager {
 	protected static EntityMap entityMap = new EntityMap();
 
 	protected static final Logger LOG = LoggerFactory.getLogger(PersistencyManager.class);
+	
+	protected Database db;
+	
+	public PersistencyManager(Database database) {
+		this.db = database;
+	}
 
-	public static void update(Persistable obj, ConflictAlgorithm conflictResolution) {
-		Database db = DatabaseConnection.get();
+	public void save(Persistable obj) {
+		save(obj, null);
+	}
+
+	public void save(Persistable obj, ConflictAlgorithm conflictResolution) {
+		if (obj.hasId()) {
+			update(obj, conflictResolution);
+		} else {
+			obj.setId(insert(obj, conflictResolution));
+		}
+	}
+
+	public void update(Persistable obj, ConflictAlgorithm conflictResolution) {
 		EntityMapper map = entityMap.get(obj.getClass());
 
 		HashMap<String, Object> row = new HashMap<String, Object>();
@@ -60,8 +80,7 @@ public class PersistencyManager {
 		db.execSQL(sql.toString(), values);
 	}
 
-	public static long insert(Persistable obj, ConflictAlgorithm conflictResolution) {
-		Database db = DatabaseConnection.get();
+	public long insert(Persistable obj, ConflictAlgorithm conflictResolution) {
 		EntityMapper map = entityMap.get(obj.getClass());
 
 		HashMap<String, Object> row = new HashMap<String, Object>();
@@ -90,8 +109,7 @@ public class PersistencyManager {
 			sep = ", ";
 		}
 		sql.append(")");
-		LOG.debug("insert entity={} sql={} values={}",
-				new Object[] { obj.getClass(), sql.toString(), values });
+		LOG.debug("insert entity={} sql={} values={}", new Object[] { obj.getClass(), sql.toString(), values });
 		Statement stmt = db.compileStatement(sql.toString());
 		try {
 			for (int i = 0; i < values.length; ++i) {
@@ -103,8 +121,12 @@ public class PersistencyManager {
 		}
 	}
 
-	public static void destroy(Persistable obj) {
-		Database db = DatabaseConnection.get();
+	public void destroy(Persistable obj) {
+		if (!obj.hasId()) {
+			// TODO: exceptions.
+			throw new NormSQLException("object " + this + " does not have an ID.");
+		}
+
 		EntityMapper map = entityMap.get(obj.getClass());
 
 		StringBuilder sql = new StringBuilder("DELETE FROM ");
@@ -114,12 +136,12 @@ public class PersistencyManager {
 		db.execSQL(sql.toString(), new Object[] { obj.getId() });
 	}
 
-	public static <T extends Persistable> T findById(Class<T> entity, long id) {
+	public <T extends Persistable> T findById(Class<T> entity, long id) {
 		return findById(entity, (Long) id);
 	}
 
-	public static <T extends Persistable> T findById(Class<T> entity, Long id) {
-		EntityCursor<T> cursor = findAll(entity, "rowid=?").bind(id).execute();
+	public <T extends Persistable> T findById(Class<T> entity, Long id) {
+		EntityCursor<T> cursor = new EntityCursor<T>(entity, findAll(entity, "rowid=?").bind(id).execute());
 		try {
 			if (cursor.moveToNext()) {
 				return cursor.getEntity();
@@ -131,20 +153,30 @@ public class PersistencyManager {
 		}
 	}
 
-	public static <T extends Persistable> SelectBuilder<T> findAll(Class<T> entity) {
+	public <T extends Persistable> SelectBuilder<T, CursorClass> findAll(Class<T> entity) {
 		return findAll(entity, "");
 	}
 
-	public static <T extends Persistable> SelectBuilder<T> findAll(Class<T> entity, String condition) {
-		return new SelectBuilder<T>(entity, condition);
+	public <T extends Persistable> SelectBuilder<T, CursorClass> findAll(Class<T> entity, String condition) {
+		return new SelectBuilder<T, CursorClass>(db, entity, condition);
 	}
 
-	public static <T extends Persistable> SelectCountBuilder<T> countAll(Class<T> entity) {
-		return new SelectCountBuilder<T>(entity, "");
+	public <T extends Persistable> SelectCountBuilder<T, CursorClass> countAll(Class<T> entity) {
+		return new SelectCountBuilder<T, CursorClass>(db, entity, "");
 	}
 
-	public static <T extends Persistable> SelectCountBuilder<T> countAll(Class<T> entity, String condition) {
-		return new SelectCountBuilder<T>(entity, condition);
+	public <T extends Persistable> SelectCountBuilder<T, CursorClass> countAll(Class<T> entity, String condition) {
+		return new SelectCountBuilder<T, CursorClass>(db, entity, condition);
+	}
+
+	public static <T extends Persistable> T mapRowToNewObject(Class<T> entityClass, DataRow row) {
+		EntityMapper entityMapper = entityMap.get(entityClass);
+		if (entityMapper.isPolymorphic()) {
+			Class<?> clazz = entityMapper.getPolymorphicInstanceClass(row);
+			return PersistencyManager.entityMap.get(clazz).mapRowToNewObject(row);
+		}
+
+		return entityMapper.mapRowToNewObject(row);
 	}
 
 	public static void register(Class<? extends PersistentObject> entity) {

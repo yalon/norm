@@ -1,11 +1,8 @@
 package com.yalon.norm.persist;
 
 public interface Persistable {
-
-	public abstract boolean equals(Object obj);
-
-	public abstract boolean hasId();
-
-	public abstract Long getId();
-
+	boolean equals(Object obj);
+	boolean hasId();
+	Long getId();
+	void setId(Long id);
 }

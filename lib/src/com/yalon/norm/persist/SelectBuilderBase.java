@@ -11,32 +11,44 @@ import com.yalon.norm.NormSQLException;
 import com.yalon.norm.mapper.EntityMapper;
 import com.yalon.norm.utils.StringUtils;
 
-public class SelectBuilderBase<T extends Persistable, S extends SelectBuilderBase<T, ?>> {
+public class SelectBuilderBase<T extends Persistable, CursorClass extends Cursor, S extends SelectBuilderBase<T, CursorClass, ?>> {
 	protected static final Logger LOG = LoggerFactory.getLogger(PersistencyManager.class);
 
 	protected Class<T> entity;
 	protected EntityMapper entityMapper;
 	protected String condition;
 	protected ArrayList<String> bindValues;
+	protected ArrayList<String> orderByColumns;
 	protected boolean distinct;
 	protected long limit;
 	protected long offset;
-	protected EntitySelectFilter<T> filter;
+	protected Database db;
 
-	public SelectBuilderBase(Class<T> entity, String condition) {
+	public SelectBuilderBase(Database db, Class<T> entity, String condition) {
+		this.db = db;
 		this.entity = entity;
 		this.entityMapper = PersistencyManager.entityMap.get(entity);
-		this.condition = parseCondition(condition);
+		this.condition = parseFieldReferences(condition);
 		this.bindValues = new ArrayList<String>();
+		this.orderByColumns = new ArrayList<String>();
 		this.distinct = false;
 		this.limit = -1;
 		this.offset = -1;
-		this.filter = null;
 	}
 
 	@SuppressWarnings("unchecked")
 	public S distinct() {
 		this.distinct = true;
+		return (S) this;
+	}
+
+	public S orderBy(String name) {
+		return orderBy(name, true);
+	}
+
+	@SuppressWarnings("unchecked")
+	public S orderBy(String name, boolean asc) {
+		orderByColumns.add(parseFieldReferences(name) + (asc ? " ASC" : " DESC"));
 		return (S) this;
 	}
 
@@ -64,12 +76,7 @@ public class SelectBuilderBase<T extends Persistable, S extends SelectBuilderBas
 	}
 
 	@SuppressWarnings("unchecked")
-	public S filter(EntitySelectFilter<T> filter) {
-		this.filter = filter;
-		return (S) this;
-	}
-
-	protected EntityCursor<T> executeQuery() {
+	protected CursorClass executeQuery() {
 		StringBuilder sql = new StringBuilder("SELECT ");
 		if (distinct) {
 			sql.append("DISTINCT ");
@@ -82,6 +89,11 @@ public class SelectBuilderBase<T extends Persistable, S extends SelectBuilderBas
 			sql.append(condition);
 		}
 
+		if (!orderByColumns.isEmpty()) {
+			sql.append(" ORDER BY ");
+			StringUtils.join(orderByColumns.iterator(), ", ", sql);
+		}
+
 		if (limit >= 0) {
 			sql.append(" LIMIT ?");
 			bindValues.add(primitiveTypeToString(limit));
@@ -91,14 +103,9 @@ public class SelectBuilderBase<T extends Persistable, S extends SelectBuilderBas
 			}
 		}
 
-		Database db = DatabaseConnection.get();
 		String[] bindValuesArray = bindValues.toArray(new String[bindValues.size()]);
 		LOG.debug("SelectBuilder.executeQuery sql={} bindVars={}", sql.toString(), bindValuesArray);
-		Cursor cur = db.execQuerySQL(sql.toString(), bindValuesArray);
-		if (filter != null) {
-			return new EntityFilterCursor<T>(entity, cur, filter);
-		}
-		return new EntityCursor<T>(entity, cur);
+		return (CursorClass) db.execQuerySQL(sql.toString(), bindValuesArray);
 	}
 
 	protected void appendColumns(StringBuilder sql) {
@@ -115,7 +122,7 @@ public class SelectBuilderBase<T extends Persistable, S extends SelectBuilderBas
 		return value.toString();
 	}
 
-	protected String parseCondition(String str) {
+	protected String parseFieldReferences(String str) {
 		StringBuilder sql = new StringBuilder();
 		int matchIndex = str.indexOf('$');
 		int lastMatchEndPos = 0;
@@ -124,8 +131,8 @@ public class SelectBuilderBase<T extends Persistable, S extends SelectBuilderBas
 			if (matchIndex < str.length() - 1) {
 				if (str.charAt(matchIndex + 1) != '$') {
 					// This is an attribute.
-					for (lastMatchEndPos = matchIndex + 1; Character.isJavaIdentifierPart(str.charAt(lastMatchEndPos))
-							&& lastMatchEndPos < str.length(); ++lastMatchEndPos) {
+					for (lastMatchEndPos = matchIndex + 1; lastMatchEndPos < str.length()
+							&& Character.isJavaIdentifierPart(str.charAt(lastMatchEndPos)); ++lastMatchEndPos) {
 					}
 					String fieldName = str.substring(matchIndex + 1, lastMatchEndPos);
 					String column = entityMapper.getColumnForField(fieldName);

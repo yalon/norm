@@ -159,4 +159,11 @@ public interface Cursor extends DataRow {
 	 * @return true if the cursor is closed.
 	 */
 	boolean isClosed();
+	
+	/**
+	 * return the platform's underlying cursor implementation (ResultSet for JDBC, android.Cursor for Android)
+	 * 
+	 * @return underlying platform's cursor implementation
+	 */
+	Object getPlatformCursor();
 }
