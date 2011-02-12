@@ -25,6 +25,7 @@ public class EntityMapper {
 
 	protected EntityMapper parent;
 	protected Class<?> clazz;
+	protected ArrayList<Class<?>> children;
 	protected String tableName;
 	protected Entity.Polymorphic polymorphic;
 	protected String polymorphicColumn;
@@ -43,6 +44,7 @@ public class EntityMapper {
 	protected EntityMapper(EntityMapper parent, Class<?> clazz) {
 		this.parent = parent;
 		this.clazz = clazz;
+		this.children = new ArrayList<Class<?>>();
 		this.mappers = new ArrayList<Mapper>();
 		this.columns = new HashSet<String>();
 		createMap();
@@ -50,6 +52,10 @@ public class EntityMapper {
 
 	public Class<?> getEntityClass() {
 		return clazz;
+	}
+	
+	public ArrayList<Class<?>> getChildren() {
+		return children;
 	}
 
 	public String getTableName() {

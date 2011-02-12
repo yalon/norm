@@ -28,7 +28,7 @@ public class SelectBuilderBase<T extends Persistable, CursorClass extends Cursor
 		this.db = db;
 		this.entity = entity;
 		this.entityMapper = PersistencyManager.entityMap.get(entity);
-		this.condition = parseFieldReferences(condition);
+		this.condition = condition == null ? "" : parseFieldReferences(condition);
 		this.bindValues = new ArrayList<String>();
 		this.orderByColumns = new ArrayList<String>();
 		this.distinct = false;
@@ -84,11 +84,27 @@ public class SelectBuilderBase<T extends Persistable, CursorClass extends Cursor
 		appendColumns(sql);
 		sql.append(" FROM ");
 		sql.append(entityMapper.getTableName());
+
+		if (entityMapper.isPolymorphic()) {
+			StringBuilder typeClauseBuilder = new StringBuilder("type IN (?");
+			bindValues.add(entityMapper.getEntityClass().getName());
+			for (Class<?> clazz : entityMapper.getChildren()) {
+				typeClauseBuilder.append(", ?");
+				bindValues.add(clazz.getName());
+			}
+			typeClauseBuilder.append(")");
+			if (StringUtils.isEmpty(condition)) {
+				condition = typeClauseBuilder.toString();
+			} else {
+				condition += " AND " + typeClauseBuilder.toString();
+			}
+		}
+
 		if (!StringUtils.isEmpty(condition)) {
 			sql.append(" WHERE ");
 			sql.append(condition);
 		}
-
+		
 		if (!orderByColumns.isEmpty()) {
 			sql.append(" ORDER BY ");
 			StringUtils.join(orderByColumns.iterator(), ", ", sql);

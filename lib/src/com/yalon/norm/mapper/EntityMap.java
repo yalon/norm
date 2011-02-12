@@ -57,6 +57,7 @@ public class EntityMap {
 					parentMapper = new EntityMapper(parentMapper, c);
 					classToEntityMapper.put(c, parentMapper);
 				}
+				parentMapper.getChildren().add(clazz);
 			}
 
 			if (parentMapper == null && !clazz.isAnnotationPresent(Entity.class)) {

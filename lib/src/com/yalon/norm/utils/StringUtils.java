@@ -6,6 +6,21 @@ public class StringUtils {
 	public final static boolean isEmpty(String s) {
 		return s == null || s.length() == 0;
 	}
+	
+	public final static String repeat(String value, String delim, int count) {
+		StringBuilder builder = new StringBuilder();
+		repeat(value, delim, count, builder);
+		return builder.toString();
+	}
+	
+	public final static void repeat(String value, String delim, int count, StringBuilder builder) {
+		String sep = "";
+		for (int i = 0; i < count; ++i) {
+			builder.append(sep);
+			builder.append(value);
+			sep = delim;
+		}
+	}
 
 	public final static <T> String join(T[] array, String delim) {
 		return join(array, delim, "");
