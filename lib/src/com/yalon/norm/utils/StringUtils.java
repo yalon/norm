@@ -3,6 +3,14 @@ package com.yalon.norm.utils;
 import java.util.Iterator;
 
 public class StringUtils {
+	public final static boolean isEmpty(CharSequence s) {
+		return s == null || s.length() == 0;
+	}
+	
+	public final static boolean isBlank(String s) {
+		return s == null || s.length() == 0 || s.trim().length() == 0;
+	}
+	
 	public final static boolean isEmpty(String s) {
 		return s == null || s.length() == 0;
 	}
