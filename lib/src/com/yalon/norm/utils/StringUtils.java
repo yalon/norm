@@ -11,6 +11,19 @@ public class StringUtils {
 		return s == null || s.length() == 0 || s.trim().length() == 0;
 	}
 	
+	public final static boolean isBlank(CharSequence s) {
+		if (s == null || s.length() == 0) {
+			return true;
+		}
+		for (int i = 0; i < s.length(); ++i) {
+			if (!Character.isWhitespace(s.charAt(i))) {
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	
 	public final static boolean isEmpty(String s) {
 		return s == null || s.length() == 0;
 	}
