@@ -30,6 +30,10 @@ public class PersistencyManager<CursorClass extends Cursor> {
 	public PersistencyManager(Database database) {
 		this.db = database;
 	}
+	
+	public Database getDatabase() {
+		return this.db;
+	}
 
 	public void save(Persistable obj) {
 		save(obj, null);
